@@ -1,0 +1,1 @@
+Please place your source images in this directory.

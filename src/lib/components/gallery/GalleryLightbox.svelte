@@ -42,11 +42,11 @@
 
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-surface-900/70 backdrop-blur-xs"
-	onclick={() => dispatch('close')}
+	on:click={() => dispatch('close')}
 	transition:fade={{ duration: 200 }}
 >
 	<!-- Main Image -->
-	<div class="relative flex h-full w-full items-center justify-center p-2">
+	<div class="relative flex h-full w-full items-center justify-center p-2" on:click|stopPropagation>
 		{#if currentImage}
 			<img
 				src={getImageUrl(currentImage)}
@@ -60,7 +60,7 @@
 	<!-- Close Button -->
 	<button
 		class="variant-filled absolute top-4 right-4 z-10 btn-icon btn"
-		onclick={() => dispatch('close')}
+		on:click|stopPropagation={() => dispatch('close')}
 		aria-label="Close lightbox"
 	>
 		<X />
@@ -70,7 +70,7 @@
 	{#if images.length > 1}
 		<button
 			class="variant-filled absolute top-1/2 left-4 z-10 btn-icon btn h-16 w-16 -translate-y-1/2 text-white"
-			onclick={prevImage}
+			on:click|stopPropagation={prevImage}
 			aria-label="Previous image"
 		>
 			<ChevronLeft />
@@ -81,7 +81,7 @@
 	{#if images.length > 1}
 		<button
 			class="variant-filled absolute top-1/2 right-4 z-10 btn-icon btn h-16 w-16 -translate-y-1/2 text-white"
-			onclick={nextImage}
+			on:click|stopPropagation={nextImage}
 			aria-label="Next image"
 		>
 			<ChevronRight />

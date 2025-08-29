@@ -15,4 +15,5 @@ export const SOCIAL_LINKS = {
 	youtube: 'https://www.youtube.com/stevengerner'
 };
 
-export const IMAGES_INDEX_URL = '/manifest.json';
+export const IMAGES_INDEX_URL = 'https://images.stevengerner.com/manifest.json';
+export const IMAGES_BASE_URL = 'https://images.stevengerner.com';

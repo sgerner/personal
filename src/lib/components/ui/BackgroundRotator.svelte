@@ -50,12 +50,12 @@
 		<div
 			class="bg-layer"
 			class:visible={activeLayer === 0}
-			style:background-image="url('{layerUrls[0]}')"
+			style:background-image={`url(${encodeURI(layerUrls[0])})`}
 		></div>
 		<div
 			class="bg-layer"
 			class:visible={activeLayer === 1}
-			style:background-image="url('{layerUrls[1]}')"
+			style:background-image={`url(${encodeURI(layerUrls[1])})`}
 		></div>
 	{/if}
 

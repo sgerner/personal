@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { IMAGES_INDEX_URL } from '$lib/config/site';
+import { IMAGES_INDEX_URL, IMAGES_BASE_URL } from '$lib/config/site';
 
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load({ fetch }) {
@@ -11,11 +11,20 @@ export async function load({ fetch }) {
 		}
 		const images = await response.json();
 
+		// Prepend base URL to each image URL
+		const imagesWithAbsoluteUrls = images.map((image) => {
+			const urls = {};
+			for (const key in image.urls) {
+				urls[key] = `${IMAGES_BASE_URL}${image.urls[key]}`;
+			}
+			return { ...image, urls };
+		});
+
 		// Derive unique tags
-		const tags = [...new Set(images.flatMap((img) => img.tags))];
+		const tags = [...new Set(imagesWithAbsoluteUrls.flatMap((img) => img.tags))];
 
 		return {
-			images,
+			images: imagesWithAbsoluteUrls,
 			tags
 		};
 	} catch (error) {

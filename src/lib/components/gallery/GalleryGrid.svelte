@@ -47,6 +47,7 @@
 						loading="lazy"
 						decoding="async"
 						draggable="false"
+						crossorigin="anonymous"
 					/>
 				</picture>
 			</button>

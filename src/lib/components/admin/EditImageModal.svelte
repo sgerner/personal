@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import { flash } from '$lib/stores/status';
 	import { Wand2 } from '@lucide/svelte';
-	import { Progress, TagsInput, FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import { Progress, FileUpload } from '@skeletonlabs/skeleton-svelte';
 	import IconDropzone from '@lucide/svelte/icons/image-plus';
 	import IconFile from '@lucide/svelte/icons/paperclip';
 	import IconRemove from '@lucide/svelte/icons/circle-x';
@@ -20,6 +20,23 @@
 	let gpsJustApplied = false;
 	let MapComponent;
 	let tagsLocal = [];
+	const allowedTags = [
+		'Animals',
+		'Architecture',
+		'City',
+		'Culture',
+		'Events',
+		'Landscape',
+		'Nature',
+		'People'
+	];
+	function toggleTag(tag) {
+		if (tagsLocal.includes(tag)) {
+			tagsLocal = tagsLocal.filter((t) => t !== tag);
+		} else {
+			tagsLocal = [...tagsLocal, tag];
+		}
+	}
 	let isCreate = false;
 	let filePreview = '';
 	let bgUrl = '';
@@ -38,7 +55,11 @@
 			latLocal = '';
 			lonLocal = '';
 		}
-		tagsLocal = Array.isArray($editingImage.tags) ? [...$editingImage.tags] : [];
+		tagsLocal = Array.isArray($editingImage.tags)
+			? allowedTags.filter((t) =>
+					$editingImage.tags.some((s) => String(s).toLowerCase() === t.toLowerCase())
+				)
+			: [];
 		isCreate = !$editingImage.id;
 		bgUrl = filePreview || ($editingImage.urls && $editingImage.urls.md) || '';
 	}
@@ -92,7 +113,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleEscape} />
+<svelte:window onkeydown={handleEscape} />
 
 {#if $editingImage}
 	<div
@@ -130,7 +151,10 @@
 									if (ta) ta.value = s.description;
 								}
 								if (s.tags && Array.isArray(s.tags)) {
-									tagsLocal = s.tags;
+									// restrict to allowed set
+									tagsLocal = allowedTags.filter((t) =>
+										s.tags.some((x) => String(x).toLowerCase() === t.toLowerCase())
+									);
 								}
 								if (s.gps && typeof s.gps.lat === 'number' && typeof s.gps.lon === 'number') {
 									latLocal = s.gps.lat;
@@ -161,23 +185,23 @@
 			>
 				{#if !$editingImage.id}
 					<div class="rounded-lg bg-surface-100-900">
-                        <FileUpload
-                            name="image"
-                            accept="image/*"
-                            maxFiles={1}
-                            subtext="Attach one image."
-                            allowDrop
-                            onFileChange={(e) => handleFileChange(e)}
-                            onFileAccept={(e) => handleFileChange(e)}
-                            onFileReject={() => {
-                                errorMessage = 'Unsupported file. Please choose an image.';
-                            }}
-                            classes="w-full"
-                        >
+						<FileUpload
+							name="image"
+							accept="image/*"
+							maxFiles={1}
+							subtext="Attach one image."
+							allowDrop
+							onFileChange={(e) => handleFileChange(e)}
+							onFileAccept={(e) => handleFileChange(e)}
+							onFileReject={() => {
+								errorMessage = 'Unsupported file. Please choose an image.';
+							}}
+							classes="w-full"
+						>
 							{#snippet iconInterface()}<IconDropzone class="size-8" />{/snippet}
 							{#snippet iconFile()}<IconFile class="size-4" />{/snippet}
 							{#snippet iconFileRemove()}<IconRemove class="size-4" />{/snippet}
-                        </FileUpload>
+						</FileUpload>
 					</div>
 				{:else}
 					<input type="hidden" name="id" value={$editingImage.id} />
@@ -205,16 +229,17 @@
 					>
 				</div>
 				<div>
-					<label for="tags" class="block text-white">Tags:</label>
-					<div class="rounded-lg bg-surface-900-100">
-						<TagsInput
-							name="tags_display"
-							value={tagsLocal}
-							onValueChange={(e) => (tagsLocal = e.value)}
-							placeholder="Add Tag..."
-						/>
-						<input type="hidden" id="tags" name="tags" value={tagsLocal.join(', ')} />
-					</div>
+					<label class="block text-white">Categories:</label>
+					{#each allowedTags as tag}
+						<button
+							type="button"
+							class={`m-1 chip capitalize ${tagsLocal.includes(tag) ? 'preset-filled-tertiary-500' : 'preset-outlined-tertiary-500 bg-white/70 dark:bg-black/50'}`}
+							onclick={() => toggleTag(tag)}
+						>
+							<span>{tag}</span>
+						</button>
+					{/each}
+					<input type="hidden" id="tags" name="tags" value={tagsLocal.join(', ')} />
 				</div>
 				<div class="grid grid-cols-2 gap-4">
 					<div class="hidden">
@@ -247,7 +272,7 @@
 							type="text"
 							id="search"
 							bind:value={searchQuery}
-							on:keydown={(e) => {
+							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
 									searchLocation();
@@ -255,7 +280,7 @@
 							}}
 							class="input preset-filled-surface-900-100"
 						/>
-						<button type="button" on:click={searchLocation} class="btn preset-filled-primary-500"
+						<button type="button" onclick={searchLocation} class="btn preset-filled-primary-500"
 							>Search</button
 						>
 					</div>
@@ -291,7 +316,7 @@
 							</button>
 						</div>
 						<div class="ml-auto flex space-x-2">
-							<button type="button" on:click={closeModal} class="btn preset-tonal-error"
+							<button type="button" onclick={closeModal} class="btn preset-tonal-error"
 								>Cancel</button
 							>
 							{#if !$editingImage.id}

@@ -107,15 +107,17 @@ export const actions = {
 				}
 			};
 
+			const ALLOWED_TAGS = ['People','Animals','Architecture','Nature','City','Events','Landscape','Culture'];
+
 			const prompt = `You are a photo catalog assistant. Analyze the image and existing metadata to suggest improved metadata.
 
 Return ONLY valid JSON, no code fences or extra text, with this shape:
-{"title":"string (<=60 chars)","description":"very brief, keyword-focused (<=140 chars)","tags":["3 single-word tags, no hyphens, Title Case (e.g., Spain, Portrait)"],"gps":{"lat":number,"lon":number} or null}
+{"title":"string (<=60 chars)","description":"very brief, keyword-focused (<=140 chars)","tags":["Choose 1-3 from exactly this list: People, Animals, Architecture, Nature, City, Events, Landscape, Culture"],"gps":{"lat":number,"lon":number} or null}
 
 Guidelines:
 - Title: concise, descriptive, and captures the spirit or a unique perspective of the image, aiming for a touch of personality.
 - Description: short, focus on key search terms, and infuse a bit of character or a memorable observation about the scene.
-- Tags: single words only, no hyphens, Title Case (e.g., "Spain", "Portrait"); relevant to content and style
+- Tags: select ONLY from: People, Animals, Architecture, Nature, City, Events, Landscape, Culture
 - GPS: include only if you can infer a plausible location from content; otherwise null
 
 Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
@@ -161,20 +163,15 @@ Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
 				return fail(502, { error: 'Failed to parse suggestions JSON' });
 			}
 
-			// Basic normalization: single-word, Title Case, de-dupe, limit 10
+			// Restrict tags strictly to ALLOWED_TAGS, preserve canonical case, max 3
 			if (suggestions?.tags && Array.isArray(suggestions.tags)) {
-				const caps = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
 				const out = [];
 				for (const raw of suggestions.tags) {
-					const parts = String(raw)
-						.replace(/[^A-Za-z0-9]+/g, ' ')
-						.trim()
-						.split(/\s+/)
-						.filter(Boolean);
-
-					for (const p of parts) out.push(caps(p));
+					const lower = String(raw).trim().toLowerCase();
+					const match = ALLOWED_TAGS.find((t) => t.toLowerCase() === lower);
+					if (match) out.push(match);
 				}
-				suggestions.tags = Array.from(new Set(out)).slice(0, 10);
+				suggestions.tags = Array.from(new Set(out)).slice(0, 3);
 			}
 			if (suggestions?.gps && (suggestions.gps.lat == null || suggestions.gps.lon == null)) {
 				suggestions.gps = null;

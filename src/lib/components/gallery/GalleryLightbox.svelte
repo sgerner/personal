@@ -34,7 +34,15 @@
 		return '';
 	}
 
-	const currentImage = $derived(images[currentIndex]);
+    const currentImage = $derived(images[currentIndex]);
+    let showFullDetails = $state(false);
+    $effect(() => { showFullDetails = false; });
+
+    function truncate(text, max = 140) {
+        if (!text) return '';
+        if (text.length <= max) return text;
+        return text.slice(0, max).trimEnd() + '…';
+    }
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -53,6 +61,36 @@
 				class="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
 				draggable="false"
 			/>
+
+			<!-- Caption -->
+			<div class="absolute inset-x-0 bottom-24 md:bottom-4 z-10 mx-auto w-[min(92%,900px)]">
+				<div class="rounded-lg bg-black/60 p-3 text-white shadow-lg backdrop-blur-sm">
+					<div class="flex items-start justify-between gap-3">
+						<div class="min-w-0">
+							{#if currentImage.title}
+								<h3 class="text-base font-semibold leading-tight">{currentImage.title}</h3>
+							{/if}
+							{#if currentImage.description}
+								<p class="mt-1 text-sm leading-snug">
+									{#if showFullDetails}
+										{currentImage.description}
+									{:else}
+										{truncate(currentImage.description, 140)}
+									{/if}
+								</p>
+							{/if}
+						</div>
+						{#if currentImage.description && currentImage.description.length > 140}
+							<button
+								class="btn btn-sm preset-tonal-surface-500 whitespace-nowrap"
+								on:click={() => (showFullDetails = !showFullDetails)}
+							>
+								{showFullDetails ? 'Less' : 'More'}
+							</button>
+						{/if}
+					</div>
+				</div>
+			</div>
 		{/if}
 	</div>
 

@@ -48,7 +48,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-surface-900/70 backdrop-blur-xs"
+	class="fixed inset-0 z-[1000] flex items-center justify-center bg-surface-900/70 backdrop-blur-xs"
 	on:click={() => dispatch('close')}
 	transition:fade={{ duration: 200 }}
 >

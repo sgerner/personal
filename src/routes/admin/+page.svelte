@@ -7,6 +7,21 @@
 	import { flash } from '$lib/stores/status';
 	import GlassPanel from '$lib/components/ui/GlassPanel.svelte';
 	import { Pencil, Trash2 } from '@lucide/svelte';
+
+	let geoFilter = 'all'; // 'all' | 'with' | 'without'
+	$: imagesFiltered = $page.data.images.filter((img) => {
+		const lat = img?.gps?.lat;
+		const lon = img?.gps?.lon;
+		const hasGPS =
+			typeof lat === 'number' &&
+			typeof lon === 'number' &&
+			!Number.isNaN(lat) &&
+			!Number.isNaN(lon) &&
+			!(lat === 0 && lon === 0);
+		if (geoFilter === 'with') return hasGPS;
+		if (geoFilter === 'without') return !hasGPS;
+		return true;
+	});
 </script>
 
 <EditImageModal />
@@ -20,25 +35,45 @@
 		</form>
 	</div>
 
-	<div class="mb-8">
+	<div class="mb-6 flex flex-wrap items-center gap-3">
 		<button
-			class="btn preset-filled-primary-500"
-			on:click={() =>
-				editingImage.set({
-					mode: 'create',
-					title: '',
-					description: '',
-					tags: [],
-					urls: {},
-					gps: null
-				})}
+			class={`btn ${geoFilter === 'all' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
+			on:click={() => (geoFilter = 'all')}
 		>
-			Upload New Image
+			All
 		</button>
+		<button
+			class={`btn ${geoFilter === 'with' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
+			on:click={() => (geoFilter = 'with')}
+		>
+			Has GPS
+		</button>
+		<button
+			class={`btn ${geoFilter === 'without' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
+			on:click={() => (geoFilter = 'without')}
+		>
+			No GPS
+		</button>
+		<div class="ml-auto">
+			<button
+				class="btn preset-filled-primary-500"
+				on:click={() =>
+					editingImage.set({
+						mode: 'create',
+						title: '',
+						description: '',
+						tags: [],
+						urls: {},
+						gps: null
+					})}
+			>
+				Upload New Image
+			</button>
+		</div>
 	</div>
 
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-		{#each $page.data.images as image (image.id)}
+		{#each imagesFiltered as image (image.id)}
 			<GlassPanel>
 				<div class="group relative">
 					<img src={image.urls.thumb} alt={image.title} class="h-48 w-full object-cover" />

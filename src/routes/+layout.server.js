@@ -1,7 +1,6 @@
-// @ts-nocheck
+// JS only; remove TS annotations
 import { IMAGES_INDEX_URL, IMAGES_BASE_URL } from '$lib/config/site';
 
-/** @type {import('./$types').LayoutServerLoad} */
 export async function load({ fetch }) {
 	try {
 		const response = await fetch(IMAGES_INDEX_URL);

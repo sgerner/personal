@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	let { class: className = '' } = $props();
 </script>
 

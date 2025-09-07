@@ -1,9 +1,8 @@
-// @ts-nocheck
+// JS only; remove TS annotations
 import { SITE_URL } from '$lib/config/site';
 
 const routes = ['/', '/gallery', '/bakery', '/advocacy', '/projects', '/about'];
 
-/** @type {import('./$types').RequestHandler} */
 export async function GET() {
 	const headers = {
 		'Cache-Control': 'max-age=0, s-maxage=3600',

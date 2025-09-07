@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { images } from '$lib/stores/images.js';
 	import Seo from '$lib/components/meta/Seo.svelte';
 	import FilterChips from '$lib/components/gallery/FilterChips.svelte';

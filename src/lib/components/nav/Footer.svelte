@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { SOCIAL_LINKS } from '$lib/config/site';
 	import { Mail, Instagram, Facebook, Github } from '@lucide/svelte';
 

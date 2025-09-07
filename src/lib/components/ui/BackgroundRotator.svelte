@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { onMount } from 'svelte';
 
 	let { pool = [], intervalMs = 10000, enableVignette = true } = $props();

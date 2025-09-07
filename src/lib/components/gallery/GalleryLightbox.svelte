@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { X, ChevronLeft, ChevronRight } from '@lucide/svelte';

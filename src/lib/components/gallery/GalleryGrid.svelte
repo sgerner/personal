@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import GalleryLightbox from './GalleryLightbox.svelte';

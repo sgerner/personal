@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import Seo from '$lib/components/meta/Seo.svelte';
 	import GlassPanel from '$lib/components/ui/GlassPanel.svelte';
 	import { ArrowRight } from '@lucide/svelte';

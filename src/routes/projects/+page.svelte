@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import Seo from '$lib/components/meta/Seo.svelte';
 	import ProjectCard from '$lib/components/projects/ProjectCard.svelte';
 	import GalleryLightbox from '$lib/components/gallery/GalleryLightbox.svelte';

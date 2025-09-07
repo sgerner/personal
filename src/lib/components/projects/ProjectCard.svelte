@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { Github } from '@lucide/svelte';
 	import { createEventDispatcher } from 'svelte';
 

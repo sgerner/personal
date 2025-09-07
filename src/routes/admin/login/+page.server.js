@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ADMIN_PASSWORD } from '$env/static/private';
 import { fail, redirect } from '@sveltejs/kit';
 

@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { SITE_TITLE, SITE_TAGLINE, SITE_URL } from '$lib/config/site';
 
 	let {

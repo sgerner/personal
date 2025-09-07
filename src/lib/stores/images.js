@@ -1,4 +1,4 @@
-// @ts-nocheck
+// JS only; remove TS annotations
 import { writable } from 'svelte/store';
 
 function createImageStore() {
@@ -23,12 +23,7 @@ function createImageStore() {
 
 export const images = createImageStore();
 
-/**
- * Returns a filtered list of images suitable for hero backgrounds.
- * @param {import('./images').Image[]} allImages - The array of all images.
- * @param {string} [tag] - An optional tag to filter the pool by.
- * @returns {import('./images').Image[]} A filtered array of images.
- */
+// Returns a filtered list of images suitable for hero backgrounds.
 export function getRotationPool(allImages, tag = '') {
     // Note: This is a placeholder for a more sophisticated "hero-safe" logic.
     // For now, we'll just filter by tag if provided.

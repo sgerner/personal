@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	let { allTags = [], activeTags = $bindable() } = $props();
 
 	function toggleTag(tag) {

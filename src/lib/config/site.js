@@ -1,4 +1,3 @@
-// @ts-nocheck
 
 export const SITE_TITLE = 'Steven Gerner';
 export const SITE_TAGLINE = 'Photography, baking, bikes & bits';

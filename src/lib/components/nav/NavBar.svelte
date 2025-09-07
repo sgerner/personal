@@ -1,5 +1,4 @@
 <script>
-	// @ts-nocheck
 	import { page } from '$app/stores';
 	import { Navigation } from '@skeletonlabs/skeleton-svelte';
 	import { Sun, Moon, Home, Image as Gallery, Croissant, Heart, FolderGit2 } from '@lucide/svelte';

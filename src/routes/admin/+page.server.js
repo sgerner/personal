@@ -1,6 +1,24 @@
 import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { IMAGES_BASE_URL } from '$lib/config/site';
+import sharp from 'sharp';
+
+async function resizeImage(buffer) {
+	try {
+		return await sharp(buffer)
+			.resize({
+				width: 1024,
+				height: 1024,
+				fit: 'inside',
+				withoutEnlargement: true
+			})
+			.webp({ quality: 80 })
+			.toBuffer();
+	} catch (err) {
+		console.error('Resize failed, using original:', err);
+		return buffer;
+	}
+}
 
 export const actions = {
 	update: async ({ request, fetch }) => {
@@ -80,15 +98,18 @@ export const actions = {
 			if (image_file && typeof image_file !== 'string') {
 				mime = image_file.type || mime;
 				const arr = new Uint8Array(await image_file.arrayBuffer());
-				b64 = Buffer.from(arr).toString('base64');
+				const resized = await resizeImage(Buffer.from(arr));
+				b64 = resized.toString('base64');
+				mime = 'image/webp';
 			} else if (image_url) {
 				const imgRes = await fetch(image_url);
 				if (!imgRes.ok) {
 					return fail(502, { error: `Unable to fetch image (${imgRes.status})` });
 				}
-				mime = imgRes.headers.get('content-type') || mime;
 				const buf = new Uint8Array(await imgRes.arrayBuffer());
-				b64 = Buffer.from(buf).toString('base64');
+				const resized = await resizeImage(Buffer.from(buf));
+				b64 = resized.toString('base64');
+				mime = 'image/webp';
 			}
 
 			const context = {

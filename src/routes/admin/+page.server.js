@@ -72,7 +72,7 @@ export const actions = {
 
 		return { success: true };
 	},
-		suggest: async ({ request, fetch }) => {
+	suggest: async ({ request, fetch }) => {
 		try {
 			const data = await request.formData();
 			const id = data.get('id')?.toString();
@@ -128,7 +128,7 @@ export const actions = {
 				}
 			};
 
-			const ALLOWED_TAGS = ['People','Animals','Architecture','Nature','City','Events','Landscape','Culture'];
+			const ALLOWED_TAGS = ['People', 'Animals', 'Architecture', 'Nature', 'City', 'Events', 'Landscape', 'Culture'];
 
 			const prompt = `You are a photo catalog assistant. Analyze the image and existing metadata to suggest improved metadata.
 
@@ -152,20 +152,36 @@ Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
 				]
 			};
 
-			const resp = await fetch(
-				`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(
-					apiKey
-				)}`,
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(body)
-				}
-			);
+			let model = 'gemini-3-flash-preview';
+			if (global.geminiFallbackUntil && Date.now() < global.geminiFallbackUntil) {
+				model = 'gemini-2.5-flash';
+			}
+
+			const generate = async (m) => {
+				return await fetch(
+					`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(
+						apiKey
+					)}`,
+					{
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(body)
+					}
+				);
+			};
+
+			let resp = await generate(model);
+
+			if (resp.status === 429 && model === 'gemini-3-flash-preview') {
+				console.warn('Gemini 3 Flash rate limited (429). Falling back to 2.5 Flash for 1 hour.');
+				global.geminiFallbackUntil = Date.now() + 60 * 60 * 1000;
+				model = 'gemini-2.5-flash';
+				resp = await generate(model);
+			}
 
 			if (!resp.ok) {
 				const txt = await resp.text();
-				return fail(resp.status, { error: `Gemini error: ${txt}` });
+				return fail(resp.status, { error: `Gemini error (${model}): ${txt}` });
 			}
 
 			const out = await resp.json();

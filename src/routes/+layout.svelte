@@ -28,7 +28,7 @@
 
 		<!-- Main Content Area -->
 		<div
-			class="z-10 mb-36 flex h-screen min-h-screen max-w-full flex-grow flex-col overflow-y-auto scroll-smooth md:mb-0 md:ml-20"
+			class="z-10 mb-36 flex h-screen min-h-screen max-w-full flex-grow flex-col overflow-y-auto scroll-smooth md:mb-0 md:ml-4"
 		>
 			<!-- Add padding-bottom on mobile to avoid overlap with the bottom nav bar -->
 			<main class="flex-grow">

@@ -273,7 +273,7 @@
 			{#each passions as passion, i}
 				{@const PassionIcon = passion.icon}
 				<div
-					class="group flex flex-col items-center rounded-2xl border border-white/15 bg-white/8 p-6 text-center backdrop-blur-sm transition-all duration-500 ease-out hover:scale-105 hover:border-secondary-400/50 hover:bg-white/15"
+					class="group flex flex-col items-center rounded-2xl border border-white/15 bg-white/8 p-6 text-center backdrop-blur-sm transition-all duration-500 ease-out hover:scale-105 hover:border-secondary-400/50 hover:bg-white/15 dark:border-white/10 dark:bg-black/30"
 					class:opacity-0={!passionsVisible}
 					class:translate-y-8={!passionsVisible}
 					style="transition-delay: {i * 100 + 200}ms"

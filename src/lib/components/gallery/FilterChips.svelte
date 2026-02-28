@@ -28,26 +28,33 @@
 </script>
 
 <div
-	class="mx-auto flex max-w-fit flex-wrap justify-center gap-2 rounded-lg bg-surface-100/50 p-1 backdrop-blur-xs dark:bg-surface-800/30"
+	class="mx-auto flex max-w-fit flex-wrap justify-center gap-1.5 rounded-2xl
+            border border-white/10 bg-black/30 p-1.5 shadow-lg backdrop-blur-md"
 >
 	{#if showAll}
 		<button
 			type="button"
-			class={`chip px-2 capitalize ${activeTags.length === 0 ? 'preset-filled-tertiary-500' : 'preset-outlined-tertiary-500'}`}
+			class="chip px-3 py-1 text-sm font-semibold capitalize transition-all duration-200
+			       {activeTags.length === 0
+				? 'scale-[1.03] preset-filled-secondary-500 shadow-md'
+				: 'hover:preset-tonal-secondary-500 preset-outlined-surface-500 opacity-70 hover:opacity-100'}"
 			onclick={clearAll}
 		>
-			<span class="font-bold">All</span>
-			<span class="opacity-80">{totalCount}</span>
+			All
+			<span class="ml-1 text-xs font-normal opacity-70">{totalCount}</span>
 		</button>
 	{/if}
 	{#each Array.from(allTags) as tag}
 		<button
 			type="button"
-			class={`chip px-2 capitalize ${activeTags.includes(tag) ? 'preset-filled-tertiary-500' : 'preset-outlined-tertiary-500'}`}
+			class="chip px-3 py-1 text-sm font-semibold capitalize transition-all duration-200
+			       {activeTags.includes(tag)
+				? 'scale-[1.03] preset-filled-secondary-500 shadow-md'
+				: 'hover:preset-tonal-secondary-500 preset-outlined-surface-500 opacity-70 hover:opacity-100'}"
 			onclick={() => toggleTag(tag)}
 		>
-			<span class="font-bold">{tag}</span>
-			<span class="opacity-80">{tagCounts?.[tag] ?? 0}</span>
+			{tag}
+			<span class="ml-1 text-xs font-normal opacity-70">{tagCounts?.[tag] ?? 0}</span>
 		</button>
 	{/each}
 </div>

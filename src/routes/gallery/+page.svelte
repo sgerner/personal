@@ -65,13 +65,13 @@
 					classes="!p-0.5 rounded-xl bg-surface-100/20 backdrop-blur-md dark:bg-surface-800/40 border border-white/10"
 				>
 					<Segment.Item value="grid">
-						<div class="flex items-center gap-1.5 px-1">
+						<div class="flex items-center gap-1.5 px-1 {view === 'grid' ? '' : 'text-white'}">
 							<LayoutGrid size={14} />
 							<span class="text-sm">Grid</span>
 						</div>
 					</Segment.Item>
 					<Segment.Item value="map">
-						<div class="flex items-center gap-1.5 px-1">
+						<div class="flex items-center gap-1.5 px-1 {view === 'map' ? '' : 'text-white'}">
 							<MapIcon size={14} />
 							<span class="text-sm">Map</span>
 						</div>
@@ -89,13 +89,13 @@
 				classes="!p-0.5 rounded-xl bg-surface-100/20 backdrop-blur-md dark:bg-surface-800/40 border border-white/10"
 			>
 				<Segment.Item value="grid">
-					<div class="flex items-center gap-1.5 px-1">
+					<div class="flex items-center gap-1.5 px-1 {view === 'grid' ? '' : 'text-white'}">
 						<LayoutGrid size={14} />
 						<span class="text-sm">Grid</span>
 					</div>
 				</Segment.Item>
 				<Segment.Item value="map">
-					<div class="flex items-center gap-1.5 px-1">
+					<div class="flex items-center gap-1.5 px-1 {view === 'map' ? '' : 'text-white'}">
 						<MapIcon size={14} />
 						<span class="text-sm">Map</span>
 					</div>
@@ -105,7 +105,7 @@
 	</header>
 
 	<!-- Filter chips -->
-	<div class="sticky top-0 z-20 px-4 pt-2 pb-4">
+	<div class="top-0 z-20 px-4 pt-2 pb-4 md:sticky">
 		<FilterChips
 			allTags={$images.tags}
 			bind:activeTags

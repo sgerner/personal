@@ -5,12 +5,19 @@
 
 	const projects = [
 		{
-			title: 'Safe Spokes',
-			description: 'A digital road id bracelet for cyclists.',
+			title: 'Farin.app',
+			description: 'The Operating System for Food.',
+			tags: ['SaaS', 'Food Tech'],
+			demoUrl: 'https://farin.app',
+			image: '/projects/farin-app.png'
+		},
+		{
+			title: '3 Feet Please',
+			description: 'An event, volunteer, and advocacy hub for cyclists.',
 			tags: ['SvelteKit', 'Svelte 5', 'Tailwind', 'Skeleton UI', 'Supabase'],
 			githubUrl: 'https://github.com/sgerner/3fp-road-id',
 			demoUrl: 'https://3fp-road-id.vercel.app/',
-			image: '/projects/safe-spokes.png'
+			image: '/projects/3fp-org.png'
 		},
 		{
 			title: 'Complete Streets',

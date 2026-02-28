@@ -8,7 +8,7 @@
 		title = 'Project Title',
 		description = 'A brief one-line description of the project.',
 		tags = ['Svelte', 'Tailwind', 'Vercel'],
-		githubUrl = '#',
+		githubUrl = null,
 		demoUrl = null,
 		image = null
 	} = $props();

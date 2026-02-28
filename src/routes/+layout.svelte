@@ -20,7 +20,7 @@
 	<link rel="icon" href="/favicon.svg" />
 </svelte:head>
 
-<div on:contextmenu={handleContextMenu} class="h-screen">
+<div oncontextmenu={handleContextMenu} role="presentation" class="h-screen">
 	<BackgroundRotator pool={$images.images} intervalMs={30000} />
 
 	<div class="flex">
@@ -28,7 +28,7 @@
 
 		<!-- Main Content Area -->
 		<div
-			class="z-10 mb-36 flex h-screen min-h-screen max-w-full flex-grow flex-col overflow-y-auto md:mb-0 md:ml-20"
+			class="z-10 mb-36 flex h-screen min-h-screen max-w-full flex-grow flex-col overflow-y-auto scroll-smooth md:mb-0 md:ml-20"
 		>
 			<!-- Add padding-bottom on mobile to avoid overlap with the bottom nav bar -->
 			<main class="flex-grow">

@@ -23,84 +23,91 @@
 		{ href: '/advocacy', label: 'Advocacy', icon: Heart },
 		{ href: '/projects', label: 'Projects', icon: FolderGit2 }
 	];
-
-	let navValue = $state('Home');
 </script>
 
 <!-- Mobile Bottom Bar -->
 <div class="fixed right-0 bottom-0 left-0 z-50 md:hidden">
-	<Navigation.Bar background="bg-surface-900/70" classes="backdrop-blur-xs text-white">
-		<a href="/" class="m-0 btn-icon btn h-20 w-full p-0">
-			<img src="/favicon.svg" alt="Logo" class="h-12 w-12" />
-		</a>
-		{#each routes as route}
-			<Navigation.Tile
-				href={route.href}
-				selected={$page.url.pathname === route.href}
-				label={route.label}
-			>
-				{@const Icon = route.icon}
-				<Icon />
-			</Navigation.Tile>
-		{/each}
-		<button
-			class="btn-icon btn h-full hover:preset-filled-secondary-500"
-			onclick={toggleMode}
-			aria-label="Toggle theme"
-		>
-			{#if isDarkMode}
-				<Sun />
-			{:else}
-				<Moon />
-			{/if}
-		</button>
-	</Navigation.Bar>
-</div>
-
-<!-- Desktop Sidebar -->
-<div class="hidden md:block">
-	<Navigation.Rail
-		value={navValue}
-		onValueChange={(newValue) => (navValue = newValue)}
-		background="bg-surface-900/70"
-		classes="backdrop-blur-xs text-white"
-	>
-		{#snippet tiles()}
-			<a href="/" class="btn-icon btn flex w-14 flex-col gap-0 pb-16">
-				<img src="/favicon.svg" alt="Logo" />
-				<p class="w-full text-center text-xs font-bold text-wrap uppercase">{SITE_TITLE}</p>
-				<hr class="my-4 hr border-surface-200/50" />
+	<Navigation layout="bar" class="bg-surface-900/70 text-white backdrop-blur-xs">
+		<Navigation.Menu>
+			<a href="/" class="flex h-full items-center justify-center px-4">
+				<img src="/favicon.svg" alt="Logo" class="h-8 w-8" />
 			</a>
 			{#each routes as route}
-				<Navigation.Tile
+				<Navigation.TriggerAnchor
 					href={route.href}
-					selected={$page.url.pathname === route.href}
-					label={route.label}
-					id={route.label}
+					aria-label={route.label}
+					class="flex flex-1 flex-col items-center justify-center p-2 {$page.url.pathname ===
+					route.href
+						? 'preset-filled-primary-500'
+						: 'hover:bg-surface-800'}"
 				>
 					{@const Icon = route.icon}
-					<Icon />
-				</Navigation.Tile>
+					<Icon size={20} />
+					<span class="mt-1 text-[10px]">{route.label}</span>
+				</Navigation.TriggerAnchor>
 			{/each}
-			<Navigation.Tile
-				href="https://ButteredUpBakery.com"
-				label="Bakery"
-				id="Bakery"
-				target="_blank"
-			>
-				<Croissant />
-			</Navigation.Tile>
 			<button
-				class="btn-icon btn h-14 w-14 hover:preset-filled-secondary-500"
+				class="flex items-center justify-center px-4 hover:preset-filled-secondary-500"
 				onclick={toggleMode}
 				aria-label="Toggle theme"
 			>
 				{#if isDarkMode}
-					<Sun />
+					<Sun size={20} />
 				{:else}
-					<Moon />
+					<Moon size={20} />
 				{/if}
 			</button>
-		{/snippet}
-	</Navigation.Rail>
+		</Navigation.Menu>
+	</Navigation>
+</div>
+
+<!-- Desktop Sidebar -->
+<div class="hidden md:block">
+	<Navigation layout="rail" class="h-full bg-surface-900/70 text-white backdrop-blur-xs">
+		<Navigation.Header>
+			<a href="/" class="flex flex-col items-center gap-2 py-8">
+				<img src="/favicon.svg" alt="Logo" class="h-10 w-10" />
+				<p class="w-full px-2 text-center text-[10px] font-bold uppercase">{SITE_TITLE}</p>
+				<hr class="mt-4 w-8 border-surface-200/50" />
+			</a>
+		</Navigation.Header>
+		<Navigation.Menu>
+			{#each routes as route}
+				<Navigation.TriggerAnchor
+					href={route.href}
+					class="flex w-full flex-col items-center justify-center p-4 transition-colors {$page.url
+						.pathname === route.href
+						? 'preset-filled-primary-500'
+						: 'hover:bg-surface-800'}"
+				>
+					{@const Icon = route.icon}
+					<Icon size={24} />
+					<span class="mt-2 text-xs">{route.label}</span>
+				</Navigation.TriggerAnchor>
+			{/each}
+			<Navigation.TriggerAnchor
+				href="https://ButteredUpBakery.com"
+				target="_blank"
+				class="flex w-full flex-col items-center justify-center p-4 hover:bg-surface-800"
+			>
+				<Croissant size={24} />
+				<span class="mt-2 text-xs">Bakery</span>
+			</Navigation.TriggerAnchor>
+		</Navigation.Menu>
+		<Navigation.Footer>
+			<div class="flex justify-center p-4">
+				<button
+					class="rounded-full p-3 transition-colors hover:preset-filled-secondary-500"
+					onclick={toggleMode}
+					aria-label="Toggle theme"
+				>
+					{#if isDarkMode}
+						<Sun size={24} />
+					{:else}
+						<Moon size={24} />
+					{/if}
+				</button>
+			</div>
+		</Navigation.Footer>
+	</Navigation>
 </div>

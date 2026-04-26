@@ -1,12 +1,11 @@
 <script>
-	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import GalleryLightbox from './GalleryLightbox.svelte';
 
 	let { images = [] } = $props();
-	const dispatch = createEventDispatcher();
 
 	let mapEl;
 	let map;
@@ -26,14 +25,6 @@
 		);
 	}
 
-	function precisionForZoom(z) {
-		if (z >= 13) return 4; // ~11m
-		if (z >= 10) return 3; // ~110m
-		if (z >= 7) return 2; // ~1.1km
-		if (z >= 4) return 1; // ~11km
-		return 0; // ~110km
-	}
-
 	let didFitBounds = false;
 
 	// Clustered marker builder (uses leaflet.markercluster)
@@ -43,7 +34,9 @@
 			try {
 				markersLayer.clearLayers();
 				map.removeLayer(markersLayer);
-			} catch {}
+			} catch {
+				/* empty */
+			}
 			markersLayer = null;
 		}
 		// @ts-ignore plugin augments L
@@ -57,9 +50,9 @@
 				const child = cluster.getAllChildMarkers()[0];
 				const src = (child && child.options && child.options.thumb) || '';
 				const html = `
-            <div class=\"cluster-thumb\">
-              <img class=\"cluster-img\" src=\"${src}\" alt=\"\" />
-              <span class=\"cluster-count\">${count}</span>
+            <div class="cluster-thumb">
+              <img class="cluster-img" src="${src}" alt="" />
+              <span class="cluster-count">${count}</span>
             </div>
           `;
 				return L.divIcon({
@@ -79,8 +72,8 @@
 			const src = encodeURI(
 				img.urls?.thumb || img.urls?.sm || img.urls?.md || img.urls?.original || ''
 			);
-			const alt = (img.title || '').replace(/\"/g, '&quot;');
-			const html = `<div class=\"thumb-marker\"><img class=\"thumb-img\" src=\"${src}\" alt=\"${alt}\"></div>`;
+			const alt = (img.title || '').replace(/"/g, '&quot;');
+			const html = `<div class="thumb-marker"><img class="thumb-img" src="${src}" alt="${alt}"></div>`;
 			const icon = L.divIcon({
 				html,
 				className: 'thumb-icon',
@@ -99,70 +92,10 @@
 		if (bounds.length && ((initial && !didFitBounds) || recenter)) {
 			try {
 				map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-			} catch {}
+			} catch {
+				/* empty */
+			}
 			if (initial) didFitBounds = true;
-		}
-	}
-
-	function buildMarkers({ initial = false } = {}) {
-		if (!map || !L) return;
-		if (markersLayer) {
-			markersLayer.clearLayers();
-		} else {
-			markersLayer = L.layerGroup().addTo(map);
-		}
-
-		const bounds = [];
-
-		// group nearby points dynamically by zoom level
-		const groups = new Map();
-		const prec = precisionForZoom(map.getZoom ? map.getZoom() : 2);
-		const keyFor = ({ gps }) => `${gps.lat.toFixed(prec)},${gps.lon.toFixed(prec)}`;
-		images.forEach((img, idx) => {
-			if (!hasGPS(img)) return;
-			const key = keyFor(img);
-			if (!groups.has(key)) groups.set(key, { lat: img.gps.lat, lon: img.gps.lon, items: [] });
-			groups.get(key).items.push({ img, idx });
-		});
-
-		for (const [, group] of groups) {
-			const { lat, lon } = group;
-			const items = group.items;
-			const thumbs = items
-				.slice(0, 3)
-				.map(({ img }, i) => {
-					const src = encodeURI(
-						img.urls?.thumb || img.urls?.sm || img.urls?.md || img.urls?.original || ''
-					);
-					const alt = (img.title || '').replace(/"/g, '&quot;');
-					return `<img class=\"stack-img i${i}\" src=\"${src}\" alt=\"${alt}\">`;
-				})
-				.join('');
-			const extra =
-				items.length > 3 ? `<span class=\"stack-count\">+${items.length - 3}</span>` : '';
-			const html = `<div class=\"stack-marker\">${thumbs}${extra}</div>`;
-
-			const icon = L.divIcon({
-				html,
-				className: 'thumb-icon',
-				iconSize: [48, 48],
-				iconAnchor: [12, 12]
-			});
-			const marker = L.marker([lat, lon], { icon });
-			marker.on('click', () => {
-				// open the first image from this group
-				selectedIndex = items[0].idx;
-			});
-			marker.addTo(markersLayer);
-			bounds.push([lat, lon]);
-		}
-
-		// Only fit to bounds on initial render to avoid feedback loops with zoomend
-		if (initial && !didFitBounds && bounds.length) {
-			try {
-				map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-			} catch {}
-			didFitBounds = true;
 		}
 	}
 

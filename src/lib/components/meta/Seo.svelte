@@ -8,7 +8,22 @@
 		canonical = SITE_URL
 	} = $props();
 
-	const fullTitle = title === SITE_TITLE ? SITE_TITLE : `${title} | ${SITE_TITLE}`;
+	const fullTitle = $derived(title === SITE_TITLE ? SITE_TITLE : `${title} | ${SITE_TITLE}`);
+
+	const _ldJson = $derived(
+		JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			url: SITE_URL,
+			name: SITE_TITLE,
+			description: SITE_TAGLINE,
+			author: {
+				'@type': 'Person',
+				name: 'Steven Gerner',
+				url: SITE_URL
+			}
+		})
+	);
 </script>
 
 <svelte:head>
@@ -30,18 +45,8 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
 
+	<!-- prettier-ignore -->
 	<script type="application/ld+json">
-		{JSON.stringify({
-			'@context': 'https://schema.org',
-			'@type': 'WebSite',
-			url: SITE_URL,
-			name: SITE_TITLE,
-			description: SITE_TAGLINE,
-			author: {
-				'@type': 'Person',
-				name: 'Steven Gerner',
-				url: SITE_URL
-			}
-		})}
+		{_ldJson}
 	</script>
 </svelte:head>

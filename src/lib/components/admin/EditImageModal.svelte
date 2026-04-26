@@ -2,34 +2,28 @@
 	import { editingImage } from '$lib/stores/modal';
 	import { enhance } from '$app/forms';
 	import { fade } from 'svelte/transition';
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 	import { flash } from '$lib/stores/status';
 	import { Wand2 } from '@lucide/svelte';
 	import { Progress, FileUpload } from '@skeletonlabs/skeleton-svelte';
 	import IconDropzone from '@lucide/svelte/icons/image-plus';
 	import IconFile from '@lucide/svelte/icons/paperclip';
-	import IconRemove from '@lucide/svelte/icons/circle-x';
 	import 'leaflet/dist/leaflet.css';
 
-	let formElement;
-	let errorMessage = '';
-	let pending = false;
-	let latLocal = '';
-	let lonLocal = '';
-	let searchQuery = '';
-	let gpsJustApplied = false;
-	let MapComponent;
-	let tagsLocal = [];
-	const allowedTags = [
-		'Animals',
-		'Architecture',
-		'City',
-		'Culture',
-		'Events',
-		'Landscape',
-		'Nature',
-		'People'
-	];
+	let { images = [], onSave = (_img) => {}, onCancel = () => {} } = $props();
+	const dispatch = createEventDispatcher();
+
+	let formElement = $state();
+	let errorMessage = $state('');
+	let pending = $state(false);
+	let latLocal = $state('');
+	let lonLocal = $state('');
+	let searchQuery = $state('');
+	let gpsJustApplied = $state(false);
+	let MapComponent = $state();
+	let tagsLocal = $state([]);
+	let allowedTags = $derived($images.tags || []);
+
 	function toggleTag(tag) {
 		if (tagsLocal.includes(tag)) {
 			tagsLocal = tagsLocal.filter((t) => t !== tag);
@@ -37,16 +31,17 @@
 			tagsLocal = [...tagsLocal, tag];
 		}
 	}
-	let isCreate = false;
-	let filePreview = '';
-	let bgUrl = '';
+	let _isCreate = $state(false);
+	let filePreview = $state('');
+	let bgUrl = $state('');
 
 	onMount(async () => {
 		await import('leaflet');
 		MapComponent = (await import('./Map.svelte')).default;
 	});
 
-	$: if ($editingImage) {
+	$effect(() => {
+		if (!$editingImage) return;
 		const g = $editingImage.gps;
 		if (g && typeof g.lat === 'number' && typeof g.lon === 'number') {
 			latLocal = g.lat;
@@ -60,9 +55,9 @@
 					$editingImage.tags.some((s) => String(s).toLowerCase() === t.toLowerCase())
 				)
 			: [];
-		isCreate = !$editingImage.id;
+		_isCreate = !$editingImage.id;
 		bgUrl = filePreview || ($editingImage.urls && $editingImage.urls.md) || '';
-	}
+	});
 
 	async function searchLocation() {
 		if (searchQuery.length < 3) return;
@@ -99,244 +94,240 @@
 		if (!f) return;
 		filePreview = URL.createObjectURL(f);
 		bgUrl = filePreview;
-		errorMessage = '';
-		const name = f.name || '';
-		const base = name.replace(/\.[^\.]+$/, '');
-		const display = base
-			.replace(/[_\-.]+/g, ' ')
-			.trim()
-			.split(/\s+/)
-			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-			.join(' ');
-		const ti = formElement?.querySelector('#title');
-		if (ti && !ti.value) ti.value = display;
+	}
+
+	function handleMapClick(e) {
+		latLocal = parseFloat(e.latlng.lat.toFixed(6));
+		lonLocal = parseFloat(e.latlng.lng.toFixed(6));
+		gpsJustApplied = true;
+		setTimeout(() => (gpsJustApplied = false), 2000);
+	}
+
+	function applyGpsToSearch() {
+		if (!latLocal || !lonLocal) return;
+		searchQuery = `${latLocal.toFixed(4)}, ${lonLocal.toFixed(4)}`;
 	}
 </script>
 
-<svelte:window onkeydown={handleEscape} />
-
 {#if $editingImage}
 	<div
-		transition:fade={{ duration: 150 }}
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+		class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+		transition:fade={{ duration: 200 }}
+		onkeydown={handleEscape}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div
-			class="w-full max-w-lg card rounded-lg preset-outlined-surface-500 px-4 py-2 shadow-xl"
-			role="document"
+			class="relative w-full max-w-4xl rounded-2xl border border-surface-500/30 bg-surface-900/90 shadow-2xl overflow-hidden flex flex-col md:flex-row h-full max-h-[90vh]"
 			style={`background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${bgUrl}'); background-size: cover; background-position: center;`}
 		>
-			<h2 class="mb-4 h2 text-white">{$editingImage.id ? 'Edit Image' : 'New Image'}</h2>
-			<form
-				bind:this={formElement}
-				method="POST"
-				action="?/update"
-				enctype="multipart/form-data"
-				use:enhance={() => {
-					pending = true;
-					errorMessage = '';
-					return async ({ result, update, action }) => {
-						pending = false;
-						const isSuggest = action?.search?.includes('/suggest');
-						const isUpload = action?.search?.includes('/upload');
-						if (result.type === 'success') {
-							errorMessage = '';
-							if (isSuggest) {
-								const s = result.data?.suggestions || {};
-								if (s.title) {
-									const ti = formElement.querySelector('#title');
-									if (ti) ti.value = s.title;
-								}
-								if (s.description) {
-									const ta = formElement.querySelector('#description');
-									if (ta) ta.value = s.description;
-								}
-								if (s.tags && Array.isArray(s.tags)) {
-									// restrict to allowed set
-									tagsLocal = allowedTags.filter((t) =>
-										s.tags.some((x) => String(x).toLowerCase() === t.toLowerCase())
-									);
-								}
-								if (s.gps && typeof s.gps.lat === 'number' && typeof s.gps.lon === 'number') {
-									latLocal = s.gps.lat;
-									lonLocal = s.gps.lon;
-									gpsJustApplied = true;
-									setTimeout(() => (gpsJustApplied = false), 1500);
-								}
-								flash('Suggestions applied', 'success');
-							} else {
-								if (isUpload) {
-									flash('Image uploaded', 'success');
-								} else {
-									flash('Image updated', 'success');
-								}
-								try {
-									await update({ invalidateAll: true, reset: false });
-								} catch {}
-								closeModal();
-							}
-						} else if (result.type === 'failure') {
-							errorMessage = result.data?.error || 'Update failed';
-						} else if (result.type === 'error') {
-							errorMessage = result.error?.message || 'Unexpected error';
-						}
-					};
-				}}
-				class="space-y-4"
-			>
-				{#if !$editingImage.id}
-					<div class="rounded-lg bg-surface-100-900">
-						<FileUpload
-							name="image"
-							accept="image/*"
-							maxFiles={1}
-							subtext="Attach one image."
-							allowDrop
-							onFileChange={(e) => handleFileChange(e)}
-							onFileAccept={(e) => handleFileChange(e)}
-							onFileReject={() => {
-								errorMessage = 'Unsupported file. Please choose an image.';
-							}}
-							classes="w-full"
-						>
-							{#snippet iconInterface()}<IconDropzone class="size-8" />{/snippet}
-							{#snippet iconFile()}<IconFile class="size-4" />{/snippet}
-							{#snippet iconFileRemove()}<IconRemove class="size-4" />{/snippet}
-						</FileUpload>
-					</div>
-				{:else}
-					<input type="hidden" name="id" value={$editingImage.id} />
-					<input type="hidden" name="image_url" value={$editingImage.urls.sm} />
+			<!-- Left side: Form -->
+			<div class="flex-1 p-6 md:p-8 bg-black/40 backdrop-blur-md overflow-y-auto">
+				<h2 class="h2 mb-6 text-white font-bold">{_isCreate ? 'Add' : 'Edit'} Image</h2>
+
+				{#if errorMessage}
+					<div class="alert variant-filled-error mb-6">{errorMessage}</div>
 				{/if}
-				<div>
-					<label for="title" class="block text-white">Title:</label>
-					<input
-						type="text"
-						id="title"
-						name="title"
-						value={$editingImage.title || ''}
-						required
-						class="input preset-filled-surface-900-100"
-					/>
-				</div>
-				<div>
-					<label for="description" class="block text-white">Description:</label>
-					<textarea
-						id="description"
-						name="description"
-						rows="3"
-						class="textarea preset-filled-surface-900-100"
-						>{$editingImage.description || ''}</textarea
-					>
-				</div>
-				<div>
-					<label class="block text-white">Categories:</label>
-					{#each allowedTags as tag}
+
+				<form
+					bind:this={formElement}
+					method="POST"
+					action="?/saveImage"
+					use:enhance={() => {
+						pending = true;
+						errorMessage = '';
+						return async ({ result, update }) => {
+							pending = false;
+							if (result.type === 'success') {
+								flash('Image saved', 'success');
+								try {
+									await update();
+								} catch {
+									/* empty */
+								}
+								closeModal();
+							} else if (result.type === 'failure') {
+								errorMessage = result.data?.error || 'Validation failed';
+							} else if (result.type === 'error') {
+								errorMessage = result.error?.message || 'Server error';
+							}
+						};
+					}}
+					class="space-y-6"
+				>
+					<input type="hidden" name="id" value={$editingImage.id || ''} />
+					<input type="hidden" name="tags" value={tagsLocal.join(',')} />
+
+					<div>
+						<label class="block text-white mb-1">
+							<span class="block mb-1">Title:</span>
+							<input
+								type="text"
+								name="title"
+								placeholder="Image title"
+								value={$editingImage.title || ''}
+								class="input preset-filled-surface-900-100"
+								required
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label class="block text-white mb-1">
+							<span class="block mb-1">Description:</span>
+							<textarea
+								name="description"
+								rows="3"
+								placeholder="Describe this scene..."
+								class="textarea preset-filled-surface-900-100"
+								>{$editingImage.description || ''}</textarea
+							>
+						</label>
+					</div>
+					<div>
+						<span class="block text-white font-medium mb-1">Categories:</span>
+						<div class="flex flex-wrap gap-1">
+							{#each allowedTags as tag}
+								<button
+									type="button"
+									class={`chip capitalize ${tagsLocal.includes(tag) ? 'preset-filled-tertiary-500' : 'preset-outlined-tertiary-500 bg-white/70 dark:bg-black/50'}`}
+									onclick={() => toggleTag(tag)}
+								>
+									<span>{tag}</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					<div class="grid grid-cols-2 gap-4">
+						<div>
+							<label class="block text-white mb-1">
+								<span class="block mb-1">Latitude:</span>
+								<input
+									type="number"
+									name="lat"
+									step="any"
+									placeholder="0.0000"
+									bind:value={latLocal}
+									class="input preset-filled-surface-900-100"
+								/>
+							</label>
+						</div>
+						<div>
+							<label class="block text-white mb-1">
+								<span class="block mb-1">Longitude:</span>
+								<input
+									type="number"
+									name="lon"
+									step="any"
+									placeholder="0.0000"
+									bind:value={lonLocal}
+									class="input preset-filled-surface-900-100"
+								/>
+							</label>
+						</div>
+					</div>
+
+					{#if _isCreate}
+						<div class="space-y-2">
+							<label class="block text-white mb-1">
+								<span class="block mb-1">Upload Image:</span>
+								<FileUpload
+									name="file"
+									accept="image/*"
+									maxFiles={1}
+									onFileChange={handleFileChange}
+									class="bg-white/5 border-dashed border-white/20"
+								>
+									{#snippet item(file)}
+										<div class="flex items-center gap-2 text-white">
+											<IconFile size={16} />
+											<span class="text-sm truncate">{file.name}</span>
+										</div>
+									{/snippet}
+									{#snippet placeholder()}
+										<div class="flex flex-col items-center py-4 text-white/60">
+											<IconDropzone size={32} class="mb-2" />
+											<p class="text-sm">Click or drag image to upload</p>
+										</div>
+									{/snippet}
+								</FileUpload>
+							</label>
+						</div>
+					{/if}
+
+					<div class="flex items-center gap-4 pt-4">
+						<button
+							type="submit"
+							class="btn preset-filled-primary-500 flex-1 font-bold"
+							disabled={pending}
+						>
+							{#if pending}
+								<Progress value={null} size="sm" class="w-full" />
+							{:else}
+								Save Changes
+							{/if}
+						</button>
 						<button
 							type="button"
-							class={`m-1 chip capitalize ${tagsLocal.includes(tag) ? 'preset-filled-tertiary-500' : 'preset-outlined-tertiary-500 bg-white/70 dark:bg-black/50'}`}
-							onclick={() => toggleTag(tag)}
+							class="btn preset-outlined-white"
+							onclick={closeModal}
+							disabled={pending}
 						>
-							<span>{tag}</span>
+							Cancel
 						</button>
-					{/each}
-					<input type="hidden" id="tags" name="tags" value={tagsLocal.join(', ')} />
-				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="hidden">
-						<label for="lat" class="block text-white">Latitude:</label>
-						<input
-							type="number"
-							step="any"
-							id="lat"
-							name="lat"
-							bind:value={latLocal}
-							class="input preset-filled-surface-900-100"
-						/>
 					</div>
-					<div class="hidden">
-						<label for="lon" class="block text-white">Longitude:</label>
-						<input
-							type="number"
-							step="any"
-							id="lon"
-							name="lon"
-							bind:value={lonLocal}
-							class="input preset-filled-surface-900-100"
-						/>
-					</div>
-				</div>
-				<div>
-					<label for="search" class="block text-white">Search Location:</label>
-					<div class="flex space-x-2">
-						<input
-							type="text"
-							id="search"
-							bind:value={searchQuery}
-							onkeydown={(e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									searchLocation();
-								}
-							}}
-							class="input preset-filled-surface-900-100"
-						/>
-						<button type="button" onclick={searchLocation} class="btn preset-filled-primary-500"
-							>Search</button
-						>
-					</div>
-				</div>
-				{#if MapComponent}
-					<div
-						class={`rounded-lg ${gpsJustApplied ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-black/50' : ''}`}
-					>
-						<svelte:component this={MapComponent} bind:lat={latLocal} bind:lon={lonLocal} />
-					</div>
-				{/if}
-				{#if errorMessage}
-					<div class="rounded-md bg-red-600/20 px-3 py-2 text-red-200" aria-live="polite">
-						{errorMessage}
-					</div>
-				{/if}
-				{#if pending}
-					<div class="py-2">
-						<Progress value={null} />
-					</div>
-				{:else}
-					<div class="flex justify-between space-x-2">
-						<div>
-							<button
-								type="submit"
-								formaction="?/suggest"
-								class="btn preset-filled-secondary-500"
-								title="Suggest metadata"
-								disabled={!$editingImage.id && !filePreview}
-							>
-								<Wand2 size={18} />
-								<span class="ml-1">Suggest</span>
+				</form>
+			</div>
+
+			<!-- Right side: Map -->
+			<div class="hidden md:flex flex-1 flex-col bg-surface-900/40 relative">
+				<div class="absolute inset-0 flex flex-col">
+					<div class="p-4 bg-black/60 backdrop-blur-md z-10 border-b border-white/10">
+						<div class="flex gap-2">
+							<input
+								type="text"
+								placeholder="Search for a location..."
+								class="input preset-filled-surface-900-100 flex-1 !py-1 text-sm"
+								bind:value={searchQuery}
+								onkeydown={(e) => e.key === 'Enter' && searchLocation()}
+							/>
+							<button class="btn preset-filled-secondary-500 btn-sm" onclick={searchLocation}>
+								Go
 							</button>
 						</div>
-						<div class="ml-auto flex space-x-2">
-							<button type="button" onclick={closeModal} class="btn preset-tonal-error"
-								>Cancel</button
-							>
-							{#if !$editingImage.id}
-								<button
-									type="submit"
-									class="variant-filled-primary btn preset-filled-primary-500"
-									formaction="?/upload"
-									disabled={!filePreview}
-								>
-									Upload
-								</button>
-							{:else}
-								<button type="submit" class="variant-filled-primary btn preset-filled-primary-500">
-									Update
-								</button>
-							{/if}
-						</div>
+						{#if gpsJustApplied}
+							<p class="text-xs text-green-400 mt-2 font-medium" transition:fade>
+								✓ Location updated from map
+							</p>
+						{/if}
 					</div>
-				{/if}
-			</form>
+
+					<div class="flex-1 bg-surface-800">
+						{#if MapComponent}
+							<MapComponent lat={latLocal || 0} lon={lonLocal || 0} on:click={handleMapClick} />
+						{:else}
+							<div class="w-full h-full flex items-center justify-center text-white/30">
+								Loading interactive map...
+							</div>
+						{/if}
+					</div>
+
+					<div class="p-4 bg-black/60 backdrop-blur-md z-10 border-t border-white/10 text-center">
+						<p class="text-[10px] text-white/50 uppercase tracking-widest mb-2">
+							Pro Tip: Click the map to set GPS
+						</p>
+						<button
+							class="btn btn-sm preset-outlined-tertiary-500 w-full flex items-center justify-center gap-2"
+							onclick={applyGpsToSearch}
+						>
+							<Wand2 size={12} />
+							<span>Sync search with coords</span>
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 {/if}

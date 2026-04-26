@@ -3,7 +3,6 @@
 @import 'tailwindcss';
 
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/vox';
 
 @source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
@@ -13,5 +12,5 @@
 
 html,
 body {
-	@apply h-full overflow-x-hidden;
+	@apply h-full overflow-x-hidden bg-transparent;
 }

@@ -128,7 +128,16 @@ export const actions = {
 				}
 			};
 
-			const ALLOWED_TAGS = ['People', 'Animals', 'Architecture', 'Nature', 'City', 'Events', 'Landscape', 'Culture'];
+			const ALLOWED_TAGS = [
+				'People',
+				'Animals',
+				'Architecture',
+				'Nature',
+				'City',
+				'Events',
+				'Landscape',
+				'Culture'
+			];
 
 			const prompt = `You are a photo catalog assistant. Analyze the image and existing metadata to suggest improved metadata.
 
@@ -196,7 +205,7 @@ Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
 			let suggestions;
 			try {
 				suggestions = JSON.parse(jsonStr);
-			} catch (e) {
+			} catch {
 				return fail(502, { error: 'Failed to parse suggestions JSON' });
 			}
 

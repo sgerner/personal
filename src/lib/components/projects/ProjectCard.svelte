@@ -29,7 +29,7 @@
 		</div>
 	</div>
 	{#if image}
-		<button on:click={() => dispatch('view')} class="mt-4 focus:outline-none">
+		<button onclick={() => dispatch('view')} class="mt-4 focus:outline-none">
 			<img
 				src={image}
 				alt={title}

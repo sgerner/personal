@@ -6,7 +6,11 @@
 	let { images = [], startIndex = 0 } = $props();
 	const dispatch = createEventDispatcher();
 
-	let currentIndex = $state(startIndex);
+	let currentIndex = $state(0);
+
+	$effect(() => {
+		currentIndex = startIndex;
+	});
 	let showDetails = $state(false); // toggled via info button
 	let imgVisible = $state(true);
 
@@ -19,6 +23,15 @@
 	const currentImage = $derived(images[currentIndex]);
 	const hasDetails = $derived(!!(currentImage?.description || currentImage?.tags?.length));
 
+	// Preload upcoming and previous images
+	const preloadIndices = $derived.by(() => {
+		if (images.length <= 1) return [];
+		const next1 = (currentIndex + 1) % images.length;
+		const next2 = (currentIndex + 2) % images.length;
+		const prev = (currentIndex - 1 + images.length) % images.length;
+		return [...new Set([next1, next2, prev])];
+	});
+
 	function getImageUrl(image) {
 		if (!image) return '';
 		if (typeof image === 'string') return image;
@@ -27,8 +40,10 @@
 	}
 
 	async function navigate(direction) {
+		// Reduce the "empty" duration. We still want a quick fade-out/in
+		// but pre-loading will make the "in" part much faster.
 		imgVisible = false;
-		await new Promise((r) => setTimeout(r, 120));
+		await new Promise((r) => setTimeout(r, 80));
 		currentIndex = (currentIndex + direction + images.length) % images.length;
 		imgVisible = true;
 	}
@@ -78,6 +93,13 @@
 	tabindex="-1"
 	transition:fade={{ duration: 200 }}
 >
+	<!-- ── Preload upcoming images ── -->
+	<div class="hidden" aria-hidden="true">
+		{#each preloadIndices as idx}
+			<img src={getImageUrl(images[idx])} alt="" />
+		{/each}
+	</div>
+
 	<!-- ── Full-screen image ── -->
 	{#if currentImage && imgVisible}
 		<img

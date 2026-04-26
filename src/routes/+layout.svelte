@@ -7,7 +7,9 @@
 
 	let { data, children } = $props();
 
-	images.init(data.images);
+	$effect(() => {
+		images.init(data.images);
+	});
 
 	function handleContextMenu(event) {
 		if (event.target.tagName === 'IMG') {

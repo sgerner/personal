@@ -54,7 +54,7 @@
 	];
 
 	let lightboxIndex = $state(null);
-	const projectImages = projects.map(p => ({ ...p, urls: { original: p.image } }));
+	const projectImages = projects.map((p) => ({ ...p, urls: { original: p.image } }));
 </script>
 
 <Seo title="Projects" description="A selection of personal and professional projects." />
@@ -75,7 +75,7 @@
 
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 		{#each projects as project, i}
-			<ProjectCard {...project} on:view={() => lightboxIndex = i} />
+			<ProjectCard {...project} on:view={() => (lightboxIndex = i)} />
 		{/each}
 	</div>
 </div>

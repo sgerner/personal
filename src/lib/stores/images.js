@@ -25,10 +25,10 @@ export const images = createImageStore();
 
 // Returns a filtered list of images suitable for hero backgrounds.
 export function getRotationPool(allImages, tag = '') {
-    // Note: This is a placeholder for a more sophisticated "hero-safe" logic.
-    // For now, we'll just filter by tag if provided.
-    if (tag) {
-        return allImages.filter(img => img.tags.includes(tag));
-    }
-    return allImages;
+	// Note: This is a placeholder for a more sophisticated "hero-safe" logic.
+	// For now, we'll just filter by tag if provided.
+	if (tag) {
+		return allImages.filter((img) => img.tags.includes(tag));
+	}
+	return allImages;
 }

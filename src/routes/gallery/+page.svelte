@@ -4,10 +4,10 @@
 	import FilterChips from '$lib/components/gallery/FilterChips.svelte';
 	import GalleryGrid from '$lib/components/gallery/GalleryGrid.svelte';
 	import GalleryMap from '$lib/components/gallery/GalleryMap.svelte';
-	import { Segment } from '@skeletonlabs/skeleton-svelte';
+	import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
 	import { LayoutGrid, Map as MapIcon } from '@lucide/svelte';
 
-	let { data } = $props();
+	let { data: _data } = $props();
 
 	let activeTags = $state([]);
 	let filteredImages = $state([]);
@@ -39,10 +39,10 @@
 
 <div class="min-h-screen">
 	<!-- Cinematic header -->
-	<header class="relative px-4 pt-8 pb-6">
-		<div class="mx-auto flex max-w-7xl items-end justify-between gap-4">
+	<header class="relative px-4 pt-8 pb-6 text-center">
+		<div class="mx-auto max-w-7xl">
 			<!-- Title block -->
-			<div>
+			<div class="mb-8">
 				<p
 					class="mb-1 text-xs font-semibold tracking-[0.3em] text-primary-400 uppercase opacity-80"
 				>
@@ -56,51 +56,34 @@
 				</p>
 			</div>
 
-			<!-- View toggle — desktop -->
-			<div class="hidden shrink-0 pb-1 sm:block">
-				<Segment
-					name="view"
-					value={view}
-					onValueChange={(e) => (view = e.value)}
-					classes="!p-0.5 rounded-xl bg-surface-100/20 backdrop-blur-md dark:bg-surface-800/40 border border-white/10"
-				>
-					<Segment.Item value="grid">
-						<div class="flex items-center gap-1.5 px-1 {view === 'grid' ? '' : 'text-white'}">
-							<LayoutGrid size={14} />
-							<span class="text-sm">Grid</span>
-						</div>
-					</Segment.Item>
-					<Segment.Item value="map">
-						<div class="flex items-center gap-1.5 px-1 {view === 'map' ? '' : 'text-white'}">
-							<MapIcon size={14} />
-							<span class="text-sm">Map</span>
-						</div>
-					</Segment.Item>
-				</Segment>
+			<!-- View toggle -->
+			<div class="flex justify-center pb-2">
+				<SegmentedControl name="view" value={view} onValueChange={(e) => (view = e.value)}>
+					<SegmentedControl.Control
+						class="relative flex gap-1 rounded-xl border border-white/20 bg-surface-100/30 p-1.5 shadow-xl backdrop-blur-lg dark:bg-surface-800/60"
+					>
+						<SegmentedControl.Indicator class="rounded-lg bg-primary-500 shadow-lg" />
+						<SegmentedControl.Item value="grid" class="z-10 w-24">
+							<SegmentedControl.ItemHiddenInput />
+							<SegmentedControl.ItemText
+								class="flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-white transition-colors"
+							>
+								<LayoutGrid size={16} />
+								<span>Grid</span>
+							</SegmentedControl.ItemText>
+						</SegmentedControl.Item>
+						<SegmentedControl.Item value="map" class="z-10 w-24">
+							<SegmentedControl.ItemHiddenInput />
+							<SegmentedControl.ItemText
+								class="flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-white transition-colors"
+							>
+								<MapIcon size={16} />
+								<span>Map</span>
+							</SegmentedControl.ItemText>
+						</SegmentedControl.Item>
+					</SegmentedControl.Control>
+				</SegmentedControl>
 			</div>
-		</div>
-
-		<!-- Mobile view toggle -->
-		<div class="mt-4 flex justify-center sm:hidden">
-			<Segment
-				name="view-mobile"
-				value={view}
-				onValueChange={(e) => (view = e.value)}
-				classes="!p-0.5 rounded-xl bg-surface-100/20 backdrop-blur-md dark:bg-surface-800/40 border border-white/10"
-			>
-				<Segment.Item value="grid">
-					<div class="flex items-center gap-1.5 px-1 {view === 'grid' ? '' : 'text-white'}">
-						<LayoutGrid size={14} />
-						<span class="text-sm">Grid</span>
-					</div>
-				</Segment.Item>
-				<Segment.Item value="map">
-					<div class="flex items-center gap-1.5 px-1 {view === 'map' ? '' : 'text-white'}">
-						<MapIcon size={14} />
-						<span class="text-sm">Map</span>
-					</div>
-				</Segment.Item>
-			</Segment>
 		</div>
 	</header>
 

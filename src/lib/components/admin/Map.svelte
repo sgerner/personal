@@ -21,7 +21,7 @@
 			draggable: true
 		}).addTo(map);
 
-		marker.on('dragend', function (event) {
+		marker.on('dragend', function (_event) {
 			var position = marker.getLatLng();
 			lat = position.lat;
 			lon = position.lng;

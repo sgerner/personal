@@ -97,7 +97,9 @@
 										flash('Image deleted', 'success');
 										try {
 											await update({ invalidateAll: true, reset: false });
-										} catch {}
+										} catch {
+											/* empty */
+										}
 									} else if (result.type === 'failure') {
 										flash(result.data?.error || 'Delete failed', 'error');
 									} else if (result.type === 'error') {

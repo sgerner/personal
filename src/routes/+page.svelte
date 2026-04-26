@@ -3,7 +3,6 @@
 	import GalleryLightbox from '$lib/components/gallery/GalleryLightbox.svelte';
 	import { SITE_TITLE, SITE_TAGLINE, SOCIAL_LINKS } from '$lib/config/site';
 	import {
-		ArrowRight,
 		ArrowDown,
 		Mail,
 		Instagram,

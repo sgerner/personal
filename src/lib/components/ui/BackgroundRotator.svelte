@@ -1,6 +1,4 @@
 <script>
-	import { onMount } from 'svelte';
-
 	let { pool = [], intervalMs = 10000, enableVignette = true } = $props();
 
 	let imageIndex = $state(0);
@@ -10,57 +8,62 @@
 
 	function getImageUrl(image) {
 		if (!image || !image.urls) return '';
-		return image.urls.xl || image.urls.lg || image.urls.md || image.urls.original;
+		const url = image.urls.xl || image.urls.lg || image.urls.md || image.urls.original || '';
+		return url;
 	}
 
-	onMount(() => {
-		if (pool.length === 0) return;
-
-		// Randomize the order of the images
-		shuffledPool = [...pool].sort(() => Math.random() - 0.5);
-
-		// Set initial state
-		layerUrls[0] = getImageUrl(shuffledPool[0]);
-		if (shuffledPool.length > 1) {
-			layerUrls[1] = getImageUrl(shuffledPool[1]);
+	// Watch for pool changes and initialize
+	$effect(() => {
+		if (pool.length > 0 && shuffledPool.length === 0) {
+			shuffledPool = [...pool].sort(() => Math.random() - 0.5);
+			layerUrls = [
+				getImageUrl(shuffledPool[0]),
+				shuffledPool.length > 1 ? getImageUrl(shuffledPool[1]) : ''
+			];
 		}
+	});
 
-		const intervalId = setInterval(() => {
-			// Determine next image and inactive layer
-			const nextImageIndex = (imageIndex + 1) % shuffledPool.length;
-			const inactiveLayer = 1 - activeLayer;
+	// Handle rotation interval
+	$effect(() => {
+		if (shuffledPool.length <= 1) return;
 
-			// Update the URL of the layer that is currently hidden
-			layerUrls[inactiveLayer] = getImageUrl(shuffledPool[nextImageIndex]);
+		const interval = setInterval(() => {
+			imageIndex = (imageIndex + 1) % shuffledPool.length;
+			const nextUrl = getImageUrl(shuffledPool[imageIndex]);
+			const nextLayer = 1 - activeLayer;
 
-			// Swap the active layer, triggering the CSS transition
-			activeLayer = inactiveLayer;
-			imageIndex = nextImageIndex;
+			// Update the hidden layer's URL first
+			if (nextLayer === 0) {
+				layerUrls = [nextUrl, layerUrls[1]];
+			} else {
+				layerUrls = [layerUrls[0], nextUrl];
+			}
+
+			// Then swap active layer
+			activeLayer = nextLayer;
 		}, intervalMs);
 
-		return () => {
-			clearInterval(intervalId);
-		};
+		return () => clearInterval(interval);
 	});
 </script>
 
-<div class="fixed inset-0 z-[-1] bg-black">
+<div class="pointer-events-none fixed inset-0 z-[-10] bg-black">
 	{#if shuffledPool.length > 0}
 		<div
 			class="bg-layer"
 			class:visible={activeLayer === 0}
-			style:background-image={`url(${encodeURI(layerUrls[0])})`}
+			style:background-image={layerUrls[0] ? `url("${layerUrls[0]}")` : 'none'}
 		></div>
 		<div
 			class="bg-layer"
 			class:visible={activeLayer === 1}
-			style:background-image={`url(${encodeURI(layerUrls[1])})`}
+			style:background-image={layerUrls[1] ? `url("${layerUrls[1]}")` : 'none'}
 		></div>
 	{/if}
 
 	{#if enableVignette}
 		<div
-			class="absolute inset-0 bg-black/20 [box-shadow:inset_0_0_10vmin_rgba(0,0,0,0.5)]"
+			class="absolute inset-0 z-10 bg-black/20 [box-shadow:inset_0_0_10vmin_rgba(0,0,0,0.5)]"
 		></div>
 	{/if}
 </div>

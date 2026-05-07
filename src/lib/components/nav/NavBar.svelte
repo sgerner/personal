@@ -27,34 +27,30 @@
 
 <!-- Mobile Bottom Bar -->
 <div class="fixed right-0 bottom-0 left-0 z-50 md:hidden">
-	<Navigation layout="bar" class="bg-surface-900/70 text-white backdrop-blur-xs">
-		<Navigation.Menu>
-			<a href="/" class="flex h-full items-center justify-center px-4">
-				<img src="/favicon.svg" alt="Logo" class="h-8 w-8" />
-			</a>
+	<Navigation layout="bar" class="bg-surface-900/80 text-white backdrop-blur-md border-t border-white/5">
+		<Navigation.Menu class="flex w-full flex-row">
 			{#each routes as route}
 				<Navigation.TriggerAnchor
 					href={route.href}
 					aria-label={route.label}
-					class="flex flex-1 flex-col items-center justify-center p-2 {$page.url.pathname ===
+					class="flex flex-1 items-center justify-center py-4 transition-colors {$page.url.pathname ===
 					route.href
 						? 'preset-filled-primary-500'
 						: 'hover:bg-surface-800'}"
 				>
 					{@const Icon = route.icon}
-					<Icon size={20} />
-					<span class="mt-1 text-[10px]">{route.label}</span>
+					<Icon size={24} />
 				</Navigation.TriggerAnchor>
 			{/each}
 			<button
-				class="flex items-center justify-center px-4 hover:preset-filled-secondary-500"
+				class="flex flex-1 items-center justify-center py-4 transition-colors hover:bg-surface-800"
 				onclick={toggleMode}
 				aria-label="Toggle theme"
 			>
 				{#if isDarkMode}
-					<Sun size={20} />
+					<Sun size={24} />
 				{:else}
-					<Moon size={20} />
+					<Moon size={24} />
 				{/if}
 			</button>
 		</Navigation.Menu>

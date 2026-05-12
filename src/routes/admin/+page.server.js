@@ -161,7 +161,7 @@ Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
 				]
 			};
 
-			let model = 'gemini-3-flash-preview';
+			let model = 'gemini-3.1-flash-lite';
 			if (global.geminiFallbackUntil && Date.now() < global.geminiFallbackUntil) {
 				model = 'gemini-2.5-flash';
 			}
@@ -181,8 +181,8 @@ Existing metadata (may be partial): ${JSON.stringify(context.existing)}`;
 
 			let resp = await generate(model);
 
-			if (resp.status === 429 && model === 'gemini-3-flash-preview') {
-				console.warn('Gemini 3 Flash rate limited (429). Falling back to 2.5 Flash for 1 hour.');
+			if (resp.status === 429 && model === 'gemini-3.1-flash-lite') {
+				console.warn('Gemini 3.1 Flash Lite rate limited (429). Falling back to 2.5 Flash for 1 hour.');
 				global.geminiFallbackUntil = Date.now() + 60 * 60 * 1000;
 				model = 'gemini-2.5-flash';
 				resp = await generate(model);

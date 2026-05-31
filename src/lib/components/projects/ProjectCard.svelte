@@ -29,7 +29,12 @@
 		</div>
 	</div>
 	{#if image}
-		<button onclick={() => dispatch('view')} class="mt-4 focus:outline-none">
+		<button
+			type="button"
+			onclick={() => dispatch('view')}
+			class="mt-4 focus:outline-none"
+			aria-label={`Open ${title} screenshot`}
+		>
 			<img
 				src={image}
 				alt={title}
@@ -45,12 +50,19 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				class="btn preset-filled-secondary-500 btn-sm"
+				aria-label={`View ${title} on GitHub`}
 			>
 				<Github />
 			</a>
 		{/if}
 		{#if demoUrl}
-			<a href={demoUrl} target="_blank" rel="noopener noreferrer" class="btn preset-filled">
+			<a
+				href={demoUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="btn preset-filled"
+				aria-label={`Open ${title} demo`}
+			>
 				Demo
 			</a>
 		{/if}

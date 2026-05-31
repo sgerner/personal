@@ -5,6 +5,28 @@
 
 	const projects = [
 		{
+			title: 'Memory Hub',
+			description:
+				'Personal memory hub stack for agents, ingestion, embeddings, enrichment, and operator tooling.',
+			tags: ['Python', 'Postgres', 'Ollama', 'MCP', 'Svelte 5'],
+			githubUrl: 'https://github.com/sgerner/memory-hub',
+			image: '/projects/memory-hub.png'
+		},
+		{
+			title: 'Feed Me Maybe',
+			description: 'A self-hosted, AI-powered RSS reader built with SvelteKit and SQLite.',
+			tags: ['SvelteKit', 'SQLite', 'AI', 'PWA', 'Tailwind'],
+			githubUrl: 'https://github.com/sgerner/feed-me-maybe',
+			image: '/projects/feed-me-maybe.png'
+		},
+		{
+			title: 'Dear Robot',
+			description: 'A self-hosted, AI-first email client with IMAP, SMTP, and SvelteKit.',
+			tags: ['SvelteKit', 'SQLite', 'AI', 'IMAP', 'SMTP'],
+			githubUrl: 'https://github.com/sgerner/dear-robot',
+			image: '/projects/dear-robot.png'
+		},
+		{
 			title: 'Farin.app',
 			description: 'The Operating System for Food.',
 			tags: ['SaaS', 'Food Tech'],

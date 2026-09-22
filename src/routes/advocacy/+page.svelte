@@ -120,10 +120,6 @@
 	class="relative overflow-hidden px-4 py-20 sm:px-8 lg:flex lg:min-h-[min(78vh,720px)] lg:items-center lg:py-24"
 >
 	<div
-		class="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/45 via-black/10 to-transparent"
-		aria-hidden="true"
-	></div>
-	<div
 		class="relative z-10 mx-auto grid w-full max-w-6xl items-end gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"
 	>
 		<div>
@@ -173,7 +169,7 @@
 			</div>
 		</div>
 
-		<div class="p-6 sm:p-8">
+		<div class="editorial-surface rounded-lg p-6 shadow-2xl sm:p-8">
 			<div class="mb-8 flex items-center justify-between gap-4">
 				<span
 					class="rounded-md border border-secondary-500/30 bg-secondary-400/15 px-3 py-1 text-[10px] font-bold tracking-[0.2em] text-secondary-700 uppercase dark:text-secondary-300"

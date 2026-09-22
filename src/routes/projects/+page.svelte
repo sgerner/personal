@@ -5,6 +5,38 @@
 
 	const projects = [
 		{
+			title: 'Farin.app',
+			description: 'The Operating System for Food.',
+			tags: ['SaaS', 'Food Tech'],
+			demoUrl: 'https://farin.app',
+			image: '/projects/farin-app.png'
+		},
+		{
+			title: '3 Feet Please',
+			description: 'An event, volunteer, and advocacy hub for cyclists.',
+			tags: ['SvelteKit', 'Svelte 5', 'Tailwind', 'Skeleton UI', 'Supabase'],
+			githubUrl: 'https://github.com/sgerner/3fp-road-id',
+			demoUrl: 'https://3fp-road-id.vercel.app/',
+			image: '/projects/3fp-org.png'
+		},
+		{
+			title: 'Turnleaf',
+			description:
+				'An offline-first EPUB reader for Kavita with paginated reading, progress sync, and native mobile storage.',
+			tags: ['Svelte 5', 'TypeScript', 'Capacitor', 'EPUB.js', 'SQLite'],
+			githubUrl: 'https://github.com/sgerner/turnleaf',
+			image: '/projects/turnleaf.png',
+			imageFit: 'contain'
+		},
+		{
+			title: 'Bookward',
+			description:
+				'A self-hosted, explainable book discovery system built around your reading history and trusted sources.',
+			tags: ['SvelteKit', 'FastAPI', 'SQLite', 'Embeddings', 'Self-hosted'],
+			githubUrl: 'https://github.com/sgerner/bookward',
+			image: '/projects/bookward.png'
+		},
+		{
 			title: 'Memory Hub',
 			description:
 				'Personal memory hub stack for agents, ingestion, embeddings, enrichment, and operator tooling.',
@@ -25,21 +57,6 @@
 			tags: ['SvelteKit', 'SQLite', 'AI', 'IMAP', 'SMTP'],
 			githubUrl: 'https://github.com/sgerner/dear-robot',
 			image: '/projects/dear-robot.png'
-		},
-		{
-			title: 'Farin.app',
-			description: 'The Operating System for Food.',
-			tags: ['SaaS', 'Food Tech'],
-			demoUrl: 'https://farin.app',
-			image: '/projects/farin-app.png'
-		},
-		{
-			title: '3 Feet Please',
-			description: 'An event, volunteer, and advocacy hub for cyclists.',
-			tags: ['SvelteKit', 'Svelte 5', 'Tailwind', 'Skeleton UI', 'Supabase'],
-			githubUrl: 'https://github.com/sgerner/3fp-road-id',
-			demoUrl: 'https://3fp-road-id.vercel.app/',
-			image: '/projects/3fp-org.png'
 		},
 		{
 			title: 'Complete Streets',
@@ -89,13 +106,27 @@
 	/>
 {/if}
 
-<div class="container mx-auto p-4">
-	<header class="mx-auto flex h-[30dvh] max-w-prose flex-wrap content-center text-left">
-		<h1 class="w-full h1 text-white drop-shadow-sm">Projects</h1>
-		<h5 class=" h5 text-secondary-500 uppercase drop-shadow-sm">Programming</h5>
+<div class="container mx-auto px-4 pb-16 sm:px-6">
+	<header
+		class="mx-auto flex max-w-5xl flex-col justify-end border-b border-white/20 py-16 text-left sm:py-20"
+	>
+		<p class="mb-3 text-xs font-bold tracking-[0.3em] text-secondary-300 uppercase">
+			Selected builds
+		</p>
+		<h1 class="w-full text-5xl font-black tracking-tight text-white drop-shadow-sm sm:text-7xl">
+			Projects
+		</h1>
+		<div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+			<p class="max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+				Tools, products, and experiments across memory, media, food, and mobility.
+			</p>
+			<p class="shrink-0 text-xs font-bold tracking-[0.2em] text-secondary-300 uppercase">
+				{projects.length} builds · open source + independent
+			</p>
+		</div>
 	</header>
 
-	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+	<div class="mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 		{#each projects as project, i}
 			<ProjectCard {...project} on:view={() => (lightboxIndex = i)} />
 		{/each}

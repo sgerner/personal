@@ -128,7 +128,7 @@
 	}
 </script>
 
-<div bind:this={mapEl} class="h-[65vh] w-full rounded-xl shadow-lg"></div>
+<div bind:this={mapEl} class="h-[65vh] w-full rounded-md shadow-lg"></div>
 
 {#if selectedIndex !== null}
 	<GalleryLightbox {images} startIndex={selectedIndex} on:close={closeLightbox} />

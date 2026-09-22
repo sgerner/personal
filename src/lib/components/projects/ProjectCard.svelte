@@ -1,5 +1,5 @@
 <script>
-	import { Github } from '@lucide/svelte';
+	import { ExternalLink, Github } from '@lucide/svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
@@ -10,21 +10,22 @@
 		tags = ['Svelte', 'Tailwind', 'Vercel'],
 		githubUrl = null,
 		demoUrl = null,
-		image = null
+		image = null,
+		imageFit = 'cover'
 	} = $props();
 </script>
 
 <div
-	class="flex h-full flex-col rounded-lg border border-surface-500/50 bg-surface-100/50 p-4 shadow-lg backdrop-blur-xs dark:bg-surface-800/50"
+	class="editorial-surface flex h-full flex-col rounded-lg p-4 transition hover:-translate-y-1 hover:border-secondary-500/50 dark:hover:border-secondary-400/50"
 >
 	<header class="">
-		<h4 class="h4">{title}</h4>
+		<h4 class="h4 text-slate-950 dark:text-white">{title}</h4>
 	</header>
 	<div class="flex-grow">
-		<p>{description}</p>
+		<p class="text-slate-600 dark:text-white/75">{description}</p>
 		<div class="mt-4 flex flex-wrap gap-2">
 			{#each tags as tag}
-				<span class="chip preset-tonal-primary">{tag}</span>
+				<span class="chip rounded-sm preset-tonal-primary">{tag}</span>
 			{/each}
 		</div>
 	</div>
@@ -32,13 +33,16 @@
 		<button
 			type="button"
 			onclick={() => dispatch('view')}
-			class="mt-4 focus:outline-none"
+			class="mt-4 block w-full overflow-hidden rounded-md border border-slate-900/10 bg-slate-100 focus-visible:outline-none dark:border-white/10 dark:bg-slate-950/80"
 			aria-label={`Open ${title} screenshot`}
 		>
 			<img
 				src={image}
 				alt={title}
-				class="rounded-lg shadow-md transition-transform hover:scale-105 focus:ring-2 focus:ring-primary-500"
+				class="block aspect-[16/10] h-full w-full transition-transform hover:scale-[1.02] {imageFit ===
+				'contain'
+					? 'object-contain'
+					: 'object-cover'}"
 			/>
 		</button>
 	{/if}
@@ -49,10 +53,11 @@
 				href={githubUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn preset-filled-secondary-500 btn-sm"
+				class="btn flex items-center gap-2 preset-filled-secondary-500 btn-sm"
 				aria-label={`View ${title} on GitHub`}
 			>
-				<Github />
+				<Github size={16} />
+				<span>Code</span>
 			</a>
 		{/if}
 		{#if demoUrl}
@@ -60,10 +65,11 @@
 				href={demoUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn preset-filled"
+				class="btn flex items-center gap-2 preset-filled btn-sm"
 				aria-label={`Open ${title} demo`}
 			>
-				Demo
+				Live demo
+				<ExternalLink size={14} />
 			</a>
 		{/if}
 	</footer>

@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { X, ChevronLeft, ChevronRight, Info } from '@lucide/svelte';
 
@@ -13,6 +14,28 @@
 	});
 	let showDetails = $state(false); // toggled via info button
 	let imgVisible = $state(true);
+	let dialogEl = $state(null);
+	let closeButton = $state(null);
+	let previousActiveElement = null;
+	let previousHtmlOverflow = '';
+	let previousBodyOverflow = '';
+
+	onMount(async () => {
+		previousActiveElement = document.activeElement;
+		previousHtmlOverflow = document.documentElement.style.overflow;
+		previousBodyOverflow = document.body.style.overflow;
+		document.documentElement.style.overflow = 'hidden';
+		document.body.style.overflow = 'hidden';
+
+		await tick();
+		closeButton?.focus();
+	});
+
+	onDestroy(() => {
+		document.documentElement.style.overflow = previousHtmlOverflow;
+		document.body.style.overflow = previousBodyOverflow;
+		if (previousActiveElement instanceof HTMLElement) previousActiveElement.focus();
+	});
 
 	// Close details panel when navigating
 	$effect(() => {
@@ -56,12 +79,41 @@
 	}
 
 	function handleKeydown(event) {
+		if (event.key === 'Tab') {
+			const focusableElements = Array.from(
+				dialogEl?.querySelectorAll(
+					'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+				) || []
+			).filter((element) => element instanceof HTMLElement && element.offsetParent !== null);
+
+			if (focusableElements.length === 0) {
+				event.preventDefault();
+				return;
+			}
+
+			const first = focusableElements[0];
+			const last = focusableElements[focusableElements.length - 1];
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+			return;
+		}
+
 		if (event.key === 'Escape') {
+			event.preventDefault();
 			if (showDetails) showDetails = false;
 			else dispatch('close');
-		} else if (event.key === 'ArrowRight') nextImage();
-		else if (event.key === 'ArrowLeft') prevImage();
-		else if (event.key === 'i') showDetails = !showDetails;
+		} else if (event.key === 'ArrowRight') {
+			event.preventDefault();
+			nextImage();
+		} else if (event.key === 'ArrowLeft') {
+			event.preventDefault();
+			prevImage();
+		} else if (event.key === 'i') showDetails = !showDetails;
 	}
 
 	// Touch swipe support
@@ -79,6 +131,7 @@
 
 <!-- Full-screen backdrop -->
 <div
+	bind:this={dialogEl}
 	class="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-md"
 	onclick={() => {
 		if (showDetails) showDetails = false;
@@ -130,6 +183,7 @@
 
 		<!-- Close -->
 		<button
+			bind:this={closeButton}
 			class="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full
 			       border border-white/15 bg-black/50 text-white shadow-lg
 			       backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/20

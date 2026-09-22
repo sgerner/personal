@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script>
 			(function () {
+				if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 				const preference = localStorage.getItem('mode') || 'dark';
 				document.documentElement.dataset.mode = preference;
 			})();

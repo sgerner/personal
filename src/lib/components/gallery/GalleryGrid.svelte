@@ -6,15 +6,8 @@
 	let { images = [] } = $props();
 	let selectedIndex = $state(null);
 
-	// Randomize images once per filter change
-	let randomizedImages = $derived.by(() => {
-		const copy = [...images];
-		for (let i = copy.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[copy[i], copy[j]] = [copy[j], copy[i]];
-		}
-		return copy;
-	});
+	// Keep the incoming order stable so visitors can build a visual memory of the archive.
+	let displayImages = $derived(images);
 
 	// Track which images have finished loading
 	let loadedSet = $state(new Set());
@@ -64,7 +57,7 @@
 </script>
 
 <div class="columns-1 gap-3 sm:columns-2 md:columns-3 lg:columns-4">
-	{#each randomizedImages as image, i (image.id)}
+	{#each displayImages as image, i (image.id)}
 		{@const isLoaded = loadedSet.has(image.id)}
 		{@const aspect = getAspect(i)}
 		<div
@@ -72,7 +65,7 @@
 			in:fly={{ y: 30, duration: 400, easing: quintOut, delay: Math.min(i * 40, 600) }}
 		>
 			<button
-				class="group relative block w-full overflow-hidden rounded-xl shadow-lg transition-all
+				class="group relative block w-full overflow-hidden rounded-md shadow-lg transition-all
 				       duration-500 hover:scale-[1.02] hover:shadow-2xl focus-visible:ring-2
 				       focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900
 				       focus-visible:outline-none {aspect}"
@@ -129,5 +122,5 @@
 </div>
 
 {#if selectedIndex !== null}
-	<GalleryLightbox images={randomizedImages} startIndex={selectedIndex} on:close={closeLightbox} />
+	<GalleryLightbox images={displayImages} startIndex={selectedIndex} on:close={closeLightbox} />
 {/if}

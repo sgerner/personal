@@ -7,31 +7,34 @@
 	import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
 	import { LayoutGrid, Map as MapIcon } from '@lucide/svelte';
 
-	let { data: _data } = $props();
-
 	let activeTags = $state([]);
-	let filteredImages = $state([]);
 	let view = $state('grid'); // 'grid' | 'map'
-	let allTagCounts = $state({});
+	let collection = $state('featured'); // 'featured' | 'all'
 
-	$effect(() => {
-		if (activeTags.length === 0) {
-			filteredImages = $images.images;
-		} else {
-			filteredImages = $images.images.filter((img) =>
-				(img.tags || []).some((t) => activeTags.includes(t))
-			);
-		}
+	let featuredImages = $derived.by(() => {
+		const explicitlyFeatured = $images.images.filter(
+			(image) =>
+				image.featured === true || image.isFeatured === true || image.collection === 'featured'
+		);
+		return (
+			explicitlyFeatured.length > 0 ? explicitlyFeatured : $images.images.slice(0, 18)
+		).filter(Boolean);
 	});
 
-	$effect(() => {
+	let sourceImages = $derived(collection === 'featured' ? featuredImages : $images.images);
+	let filteredImages = $derived.by(() => {
+		if (activeTags.length === 0) return sourceImages;
+		return sourceImages.filter((img) => (img.tags || []).some((t) => activeTags.includes(t)));
+	});
+
+	let tagCounts = $derived.by(() => {
 		const counts = {};
-		for (const img of $images.images) {
-			for (const t of img.tags || []) {
-				counts[t] = (counts[t] || 0) + 1;
+		for (const image of sourceImages) {
+			for (const tag of image.tags || []) {
+				counts[tag] = (counts[tag] || 0) + 1;
 			}
 		}
-		allTagCounts = counts;
+		return counts;
 	});
 </script>
 
@@ -60,9 +63,9 @@
 			<div class="flex justify-center pb-2">
 				<SegmentedControl name="view" value={view} onValueChange={(e) => (view = e.value)}>
 					<SegmentedControl.Control
-						class="relative flex gap-1 rounded-xl border border-white/20 bg-surface-100/30 p-1.5 shadow-xl backdrop-blur-lg dark:bg-surface-800/60"
+						class="relative flex gap-1 rounded-md border border-white/20 bg-surface-100/30 p-1.5 shadow-xl backdrop-blur-lg dark:bg-surface-800/60"
 					>
-						<SegmentedControl.Indicator class="rounded-lg bg-primary-500 shadow-lg" />
+						<SegmentedControl.Indicator class="rounded-sm bg-primary-500 shadow-lg" />
 						<SegmentedControl.Item value="grid" class="z-10 w-24">
 							<SegmentedControl.ItemHiddenInput />
 							<SegmentedControl.ItemText
@@ -84,25 +87,67 @@
 					</SegmentedControl.Control>
 				</SegmentedControl>
 			</div>
+
+			<div
+				class="mx-auto mt-4 flex w-fit items-center gap-1 rounded-md border border-white/15 bg-black/35 p-1 backdrop-blur-lg"
+				aria-label="Photography collection"
+			>
+				<button
+					type="button"
+					aria-pressed={collection === 'featured'}
+					class="rounded-sm px-4 py-2 text-sm font-semibold transition {collection === 'featured'
+						? 'bg-secondary-500 text-black shadow-lg'
+						: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+					onclick={() => {
+						collection = 'featured';
+						activeTags = [];
+					}}
+				>
+					Featured
+				</button>
+				<button
+					type="button"
+					aria-pressed={collection === 'all'}
+					class="rounded-sm px-4 py-2 text-sm font-semibold transition {collection === 'all'
+						? 'bg-secondary-500 text-black shadow-lg'
+						: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+					onclick={() => (collection = 'all')}
+				>
+					All photos
+				</button>
+			</div>
+
+			<p class="mt-3 text-xs tracking-[0.2em] text-white/50 uppercase">
+				{filteredImages.length}
+				{collection === 'featured' ? 'selected photographs' : 'photographs'}
+			</p>
 		</div>
 	</header>
 
 	<!-- Filter chips -->
-	<div class="top-0 z-20 px-4 pt-2 pb-4 md:sticky">
+	<div class="sticky top-0 z-20 mb-5 px-4 pt-3">
 		<FilterChips
-			allTags={$images.tags}
+			allTags={sourceImages.length === $images.images.length
+				? $images.tags
+				: new Set(sourceImages.flatMap((image) => image.tags || []))}
 			bind:activeTags
 			showAll={true}
 			single={true}
-			tagCounts={allTagCounts}
-			totalCount={$images.images.length}
+			{tagCounts}
+			totalCount={sourceImages.length}
 		/>
 	</div>
 
 	<!-- Content -->
 	<main class="px-3 pb-12 sm:px-4">
 		{#if view === 'grid'}
-			<GalleryGrid images={filteredImages} />
+			{#if filteredImages.length > 0}
+				<GalleryGrid images={filteredImages} />
+			{:else}
+				<div class="rounded-lg border border-white/10 bg-black/30 p-12 text-center text-white/70">
+					No photographs match that filter yet.
+				</div>
+			{/if}
 		{:else}
 			<GalleryMap images={filteredImages} />
 		{/if}

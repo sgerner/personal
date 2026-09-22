@@ -158,13 +158,13 @@
 	>
 		<button
 			onclick={scrollToAbout}
-			class="btn rounded-full preset-filled-secondary-500 px-7 py-3 text-sm font-bold shadow-lg shadow-secondary-500/30 transition hover:scale-105 active:scale-95"
+			class="btn rounded-md preset-filled-secondary-500 px-7 py-3 text-sm font-bold shadow-lg shadow-secondary-500/30 transition hover:-translate-y-0.5 active:translate-y-0"
 		>
 			About Me
 		</button>
 		<a
 			href="/gallery"
-			class="btn rounded-full border border-white/30 bg-white/10 px-7 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:scale-105 hover:bg-white/20 active:scale-95"
+			class="btn rounded-md border border-white/30 bg-white/10 px-7 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0"
 		>
 			View Gallery
 		</a>
@@ -191,9 +191,7 @@
 		class:translate-y-10={!aboutVisible}
 	>
 		<!-- Glass card -->
-		<div
-			class="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-md md:p-12 dark:border-white/10 dark:bg-black/30"
-		>
+		<div class="editorial-surface relative overflow-hidden rounded-lg p-8 shadow-2xl md:p-12">
 			<!-- Decorative gradient blob -->
 			<div
 				class="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-secondary-500/20 blur-3xl"
@@ -222,11 +220,13 @@
 
 				<!-- Bio -->
 				<div class="md:col-span-2">
-					<p class="mb-1 text-xs font-bold tracking-[0.2em] text-secondary-400 uppercase">
+					<p
+						class="mb-1 text-xs font-bold tracking-[0.2em] text-[#526900] uppercase dark:text-secondary-300"
+					>
 						Get to know me
 					</p>
-					<h2 class="mb-4 text-4xl font-black text-white">{SITE_TITLE}</h2>
-					<p class="mb-6 text-lg leading-relaxed text-white/80">
+					<h2 class="mb-4 text-4xl font-black text-slate-950 dark:text-white">{SITE_TITLE}</h2>
+					<p class="mb-6 text-lg leading-relaxed text-slate-600 dark:text-white/75">
 						I'm a baker, cycling advocate, and photographer who plays with technology — based in
 						Tempe, AZ. I love crafting things with my hands, whether it's sourdough, code, or a
 						perfect shot.
@@ -242,7 +242,7 @@
 									{href}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="btn rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm transition duration-200 hover:scale-105 hover:border-white/40 hover:bg-white/20 active:scale-95"
+									class="btn rounded-md border border-slate-900/10 bg-black/5 px-4 py-2 text-sm text-slate-800 backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:border-secondary-500/50 hover:bg-secondary-400/15 active:translate-y-0 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/20"
 								>
 									<SocialIcon class="h-4 w-4" />
 									<span>{social.label}</span>
@@ -264,7 +264,11 @@
 			class:opacity-0={!passionsVisible}
 			class:translate-y-8={!passionsVisible}
 		>
-			<p class="mb-2 text-xs font-bold tracking-[0.2em] text-secondary-400 uppercase">What I do</p>
+			<p
+				class="mb-2 text-xs font-bold tracking-[0.2em] text-[#526900] uppercase dark:text-secondary-300"
+			>
+				What I do
+			</p>
 			<h2 class="text-3xl font-black text-white">Passion projects</h2>
 		</div>
 
@@ -272,18 +276,18 @@
 			{#each passions as passion, i}
 				{@const PassionIcon = passion.icon}
 				<div
-					class="group flex flex-col items-center rounded-2xl border border-white/15 bg-white/8 p-6 text-center backdrop-blur-sm transition-all duration-500 ease-out hover:scale-105 hover:border-secondary-400/50 hover:bg-white/15 dark:border-white/10 dark:bg-black/30"
+					class="editorial-surface group flex flex-col items-center rounded-lg p-6 text-center transition-all duration-500 ease-out hover:-translate-y-1 hover:border-secondary-400/50"
 					class:opacity-0={!passionsVisible}
 					class:translate-y-8={!passionsVisible}
 					style="transition-delay: {i * 100 + 200}ms"
 				>
 					<div
-						class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary-500/20 text-secondary-300 transition-all duration-300 group-hover:bg-secondary-500/40 group-hover:text-white"
+						class="mb-3 flex h-12 w-12 items-center justify-center rounded-md bg-secondary-500/20 text-secondary-700 transition-all duration-300 group-hover:bg-secondary-500/40 group-hover:text-slate-950 dark:text-secondary-300 dark:group-hover:text-white"
 					>
 						<PassionIcon class="h-6 w-6" />
 					</div>
-					<p class="font-bold text-white">{passion.label}</p>
-					<p class="mt-1 text-xs text-white/60">{passion.desc}</p>
+					<p class="font-bold text-slate-950 dark:text-white">{passion.label}</p>
+					<p class="mt-1 text-xs text-slate-600 dark:text-white/60">{passion.desc}</p>
 				</div>
 			{/each}
 		</div>
@@ -297,9 +301,7 @@
 		class:opacity-0={!bakeryVisible}
 		class:translate-y-10={!bakeryVisible}
 	>
-		<div
-			class="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-black/30"
-		>
+		<div class="editorial-surface relative overflow-hidden rounded-lg shadow-2xl">
 			<!-- Warm accent blob -->
 			<div
 				class="pointer-events-none absolute -top-16 right-0 h-64 w-64 rounded-full bg-amber-400/20 blur-3xl"
@@ -309,11 +311,15 @@
 			<div class="grid grid-cols-1 gap-0 md:grid-cols-2">
 				<!-- Text side -->
 				<div class="flex flex-col justify-center p-8 md:p-12">
-					<p class="mb-2 text-xs font-bold tracking-[0.2em] text-secondary-400 uppercase">
+					<p
+						class="mb-2 text-xs font-bold tracking-[0.2em] text-[#526900] uppercase dark:text-secondary-300"
+					>
 						Food that makes you happy
 					</p>
-					<h2 class="mb-4 text-4xl font-black text-white">Buttered Up Bakery</h2>
-					<p class="mb-8 text-lg leading-relaxed text-white/80">
+					<h2 class="mb-4 text-4xl font-black text-slate-950 dark:text-white">
+						Buttered Up Bakery
+					</h2>
+					<p class="mb-8 text-lg leading-relaxed text-slate-600 dark:text-white/75">
 						Delightful pastries crafted with love. Indulge in my handcrafted breads, pastries, and
 						sandwiches — made fresh every day in Tempe, AZ.
 					</p>
@@ -321,7 +327,7 @@
 						href="https://butteredupbakery.com"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="btn w-fit rounded-full border border-amber-400/50 bg-amber-500/20 px-7 py-3 text-sm font-bold text-amber-200 backdrop-blur-sm transition hover:scale-105 hover:bg-amber-500/40 active:scale-95"
+						class="btn w-fit rounded-md border border-amber-500/40 bg-amber-400/20 px-7 py-3 text-sm font-bold text-amber-800 backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-amber-400/35 active:translate-y-0 dark:border-amber-400/50 dark:bg-amber-500/20 dark:text-amber-200 dark:hover:bg-amber-500/40"
 					>
 						<Croissant class="h-4 w-4" />
 						<span>Visit the Bakery</span>
@@ -347,7 +353,7 @@
 								{#each bakeryImages as src, i}
 									<button
 										onclick={() => (lightboxIndex = i)}
-										class="group relative min-w-[7rem] flex-1 overflow-hidden rounded-xl focus:outline-none"
+										class="group relative min-w-[7rem] flex-1 overflow-hidden rounded-md focus:outline-none"
 										aria-label="View bakery image {i + 1}"
 									>
 										<img

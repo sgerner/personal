@@ -8,7 +8,7 @@
 
 	function getImageUrl(image) {
 		if (!image || !image.urls) return '';
-		const url = image.urls.xl || image.urls.lg || image.urls.md || image.urls.original || '';
+		const url = image.urls.lg || image.urls.xl || image.urls.md || image.urls.original || '';
 		return url;
 	}
 
@@ -47,7 +47,7 @@
 	});
 </script>
 
-<div class="pointer-events-none fixed inset-0 z-[-10] bg-black">
+<div class="pointer-events-none fixed inset-0 z-0 bg-black" aria-hidden="true">
 	{#if shuffledPool.length > 0}
 		<div
 			class="bg-layer"

@@ -120,9 +120,6 @@
 			<p class="max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
 				Tools, products, and experiments across memory, media, food, and mobility.
 			</p>
-			<p class="shrink-0 text-xs font-bold tracking-[0.2em] text-secondary-300 uppercase">
-				{projects.length} builds · open source + independent
-			</p>
 		</div>
 	</header>
 

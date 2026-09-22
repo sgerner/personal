@@ -173,7 +173,7 @@
 			</div>
 		</div>
 
-		<div class="editorial-surface rounded-lg p-6 shadow-2xl sm:p-8">
+		<div class="p-6 sm:p-8">
 			<div class="mb-8 flex items-center justify-between gap-4">
 				<span
 					class="rounded-md border border-secondary-500/30 bg-secondary-400/15 px-3 py-1 text-[10px] font-bold tracking-[0.2em] text-secondary-700 uppercase dark:text-secondary-300"

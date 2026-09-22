@@ -1,35 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 256 256"
+	role="img"
+	aria-labelledby="title desc"
+>
 	<title id="title">Steven Gerner</title>
-	<desc id="desc">Interlocking S and G monogram in lime and coral</desc>
+	<desc id="desc">Transparent SG monogram in lime, coral, and blue</desc>
 	<defs>
-		<linearGradient id="s-accent" x1="40" y1="40" x2="208" y2="218" gradientUnits="userSpaceOnUse">
+		<linearGradient id="s-gradient" x1="0" y1="0" x2="0" y2="1">
 			<stop stop-color="#e1ff69" />
 			<stop offset="1" stop-color="#a9c8ff" />
 		</linearGradient>
-		<linearGradient id="g-accent" x1="210" y1="48" x2="80" y2="214" gradientUnits="userSpaceOnUse">
-			<stop stop-color="#ffb3c2" />
-			<stop offset="1" stop-color="#ffcf84" />
+		<linearGradient id="g-gradient" x1="0" y1="0" x2="1" y2="1">
+			<stop stop-color="#ffb0bd" />
+			<stop offset="1" stop-color="#a9c8ff" />
 		</linearGradient>
-		<filter id="mark-shadow" x="-30%" y="-30%" width="160%" height="160%">
-			<feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".28" />
-		</filter>
 	</defs>
-
-	<rect width="256" height="256" rx="42" fill="#121421" />
-	<rect x="10" y="10" width="236" height="236" rx="34" fill="none" stroke="#fff" stroke-opacity=".12" />
-
-	<g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#mark-shadow)">
-		<path
-			d="M178 78c-17-15-38-23-62-23-34 0-58 16-58 41 0 22 17 34 51 41l26 6c35 8 52 22 52 48 0 33-29 55-75 55-35 0-64-10-86-31"
-			stroke="url(#s-accent)"
-			stroke-width="24"
-		/>
-		<path
-			d="M203 84c-12-19-32-29-56-29-39 0-65 29-65 75 0 43 24 72 63 72 25 0 45-10 58-28v-47h-47"
-			stroke="url(#g-accent)"
-			stroke-width="24"
-		/>
-	</g>
-
-	<circle cx="211" cy="43" r="7" fill="#e1ff69" />
+	<text
+		x="12"
+		y="183"
+		font-family="Inter, Helvetica Neue, Arial, sans-serif"
+		font-size="166"
+		font-weight="800"
+		fill="url(#s-gradient)"
+	>
+		S
+	</text>
+	<text
+		x="112"
+		y="183"
+		font-family="Inter, Helvetica Neue, Arial, sans-serif"
+		font-size="166"
+		font-weight="800"
+		fill="url(#g-gradient)"
+	>
+		G
+	</text>
 </svg>

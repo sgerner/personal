@@ -9,19 +9,7 @@
 
 	let activeTags = $state([]);
 	let view = $state('grid'); // 'grid' | 'map'
-	let collection = $state('featured'); // 'featured' | 'all'
-
-	let featuredImages = $derived.by(() => {
-		const explicitlyFeatured = $images.images.filter(
-			(image) =>
-				image.featured === true || image.isFeatured === true || image.collection === 'featured'
-		);
-		return (
-			explicitlyFeatured.length > 0 ? explicitlyFeatured : $images.images.slice(0, 18)
-		).filter(Boolean);
-	});
-
-	let sourceImages = $derived(collection === 'featured' ? featuredImages : $images.images);
+	let sourceImages = $derived($images.images);
 	let filteredImages = $derived.by(() => {
 		if (activeTags.length === 0) return sourceImages;
 		return sourceImages.filter((img) => (img.tags || []).some((t) => activeTags.includes(t)));
@@ -88,38 +76,8 @@
 				</SegmentedControl>
 			</div>
 
-			<div
-				class="mx-auto mt-4 flex w-fit items-center gap-1 rounded-md border border-white/15 bg-black/35 p-1 backdrop-blur-lg"
-				aria-label="Photography collection"
-			>
-				<button
-					type="button"
-					aria-pressed={collection === 'featured'}
-					class="rounded-sm px-4 py-2 text-sm font-semibold transition {collection === 'featured'
-						? 'bg-secondary-500 text-black shadow-lg'
-						: 'text-white/70 hover:bg-white/10 hover:text-white'}"
-					onclick={() => {
-						collection = 'featured';
-						activeTags = [];
-					}}
-				>
-					Featured
-				</button>
-				<button
-					type="button"
-					aria-pressed={collection === 'all'}
-					class="rounded-sm px-4 py-2 text-sm font-semibold transition {collection === 'all'
-						? 'bg-secondary-500 text-black shadow-lg'
-						: 'text-white/70 hover:bg-white/10 hover:text-white'}"
-					onclick={() => (collection = 'all')}
-				>
-					All photos
-				</button>
-			</div>
-
 			<p class="mt-3 text-xs tracking-[0.2em] text-white/50 uppercase">
-				{filteredImages.length}
-				{collection === 'featured' ? 'selected photographs' : 'photographs'}
+				{filteredImages.length} photographs
 			</p>
 		</div>
 	</header>
@@ -127,9 +85,7 @@
 	<!-- Filter chips -->
 	<div class="sticky top-0 z-20 mb-5 px-4 pt-3">
 		<FilterChips
-			allTags={sourceImages.length === $images.images.length
-				? $images.tags
-				: new Set(sourceImages.flatMap((image) => image.tags || []))}
+			allTags={$images.tags}
 			bind:activeTags
 			showAll={true}
 			single={true}

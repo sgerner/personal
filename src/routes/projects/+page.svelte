@@ -29,6 +29,14 @@
 			imageFit: 'contain'
 		},
 		{
+			title: 'Vesperwing Glass',
+			description:
+				'A translucent light and dark glass design for Thunderbird, including the inbox, message reader, compose window, Settings, and Add-ons.',
+			tags: ['Thunderbird', 'WebExtension', 'CSS', 'KDE Plasma'],
+			githubUrl: 'https://github.com/sgerner/vesperwing-glass',
+			image: '/projects/vesperwing-glass.jpg'
+		},
+		{
 			title: 'Bookward',
 			description:
 				'A self-hosted, explainable book discovery system built around your reading history and trusted sources.',

@@ -12,6 +12,14 @@
 			image: '/projects/farin-app.png'
 		},
 		{
+			title: 'Flavorithm',
+			description:
+				'A thoughtful kitchen companion for turning pantry ingredients into recipes, meal plans, and shopping lists.',
+			tags: ['SvelteKit', 'TypeScript', 'SQLite', 'PWA'],
+			githubUrl: 'https://github.com/sgerner/flavorithm',
+			image: '/projects/flavorithm.jpg'
+		},
+		{
 			title: '3 Feet Please',
 			description: 'An event, volunteer, and advocacy hub for cyclists.',
 			tags: ['SvelteKit', 'Svelte 5', 'Tailwind', 'Skeleton UI', 'Supabase'],

@@ -5,6 +5,15 @@
 
 	const projects = [
 		{
+			title: 'GiveLoom',
+			description:
+				'A self-hosted supporter CRM for nonprofits, connecting donor records, giving, stewardship, and outreach.',
+			tags: ['SvelteKit', 'Svelte 5', 'PostgreSQL', 'Nonprofit CRM'],
+			githubUrl: 'https://github.com/sgerner/giveloom',
+			demoUrl: 'https://demo-give.stevengerner.com/demo/start',
+			image: '/projects/giveloom.png'
+		},
+		{
 			title: 'Farin.app',
 			description: 'The Operating System for Food.',
 			tags: ['SaaS', 'Food Tech'],

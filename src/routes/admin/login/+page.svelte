@@ -1,8 +1,13 @@
 <script>
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import { SITE_TITLE } from '$lib/config/site';
 	import GlassPanel from '$lib/components/ui/GlassPanel.svelte';
 </script>
+
+<svelte:head>
+	<title>Admin Login | {SITE_TITLE}</title>
+</svelte:head>
 
 <div class="container mx-auto flex flex-col gap-4 space-y-8 p-4">
 	<GlassPanel>
@@ -21,9 +26,9 @@
 					class="input preset-filled-surface-200-800"
 				/>
 			</div>
-			{#if $page.form?.error}
+			{#if page.form?.error}
 				<div class="mx-2 card preset-tonal-error px-4 py-1">
-					<p class="text-error-900-100">{$page.form.error}</p>
+					<p class="text-error-900-100">{page.form.error}</p>
 				</div>
 			{/if}
 			<button type="submit" class="btn preset-filled-primary-500">Login</button>

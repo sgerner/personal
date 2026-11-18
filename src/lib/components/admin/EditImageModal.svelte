@@ -2,18 +2,14 @@
 	import { editingImage } from '$lib/stores/modal';
 	import { enhance } from '$app/forms';
 	import { fade } from 'svelte/transition';
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { flash } from '$lib/stores/status';
 	import { Wand2 } from '@lucide/svelte';
-	import { Progress, FileUpload } from '@skeletonlabs/skeleton-svelte';
-	import IconDropzone from '@lucide/svelte/icons/image-plus';
-	import IconFile from '@lucide/svelte/icons/paperclip';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import 'leaflet/dist/leaflet.css';
 
-	let { images = [], onSave = (_img) => {}, onCancel = () => {} } = $props();
-	const dispatch = createEventDispatcher();
+	let { allowedTags = [] } = $props();
 
-	let formElement = $state();
 	let errorMessage = $state('');
 	let pending = $state(false);
 	let latLocal = $state('');
@@ -22,7 +18,6 @@
 	let gpsJustApplied = $state(false);
 	let MapComponent = $state();
 	let tagsLocal = $state([]);
-	let allowedTags = $derived($images.tags || []);
 
 	function toggleTag(tag) {
 		if (tagsLocal.includes(tag)) {
@@ -31,14 +26,15 @@
 			tagsLocal = [...tagsLocal, tag];
 		}
 	}
-	let _isCreate = $state(false);
+	const isCreate = $derived(!$editingImage?.id);
 	let filePreview = $state('');
-	let bgUrl = $state('');
+	const bgUrl = $derived(filePreview || $editingImage?.urls?.md || '');
 
 	onMount(async () => {
-		await import('leaflet');
 		MapComponent = (await import('./Map.svelte')).default;
 	});
+
+	onDestroy(() => URL.revokeObjectURL(filePreview));
 
 	$effect(() => {
 		if (!$editingImage) return;
@@ -55,14 +51,12 @@
 					$editingImage.tags.some((s) => String(s).toLowerCase() === t.toLowerCase())
 				)
 			: [];
-		_isCreate = !$editingImage.id;
-		bgUrl = filePreview || ($editingImage.urls && $editingImage.urls.md) || '';
 	});
 
 	async function searchLocation() {
 		if (searchQuery.length < 3) return;
 		const response = await fetch(
-			`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}`
+			`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
 		);
 		const data = await response.json();
 		if (data && data.length > 0) {
@@ -73,6 +67,10 @@
 	}
 
 	function closeModal() {
+		URL.revokeObjectURL(filePreview);
+		filePreview = '';
+		errorMessage = '';
+		searchQuery = '';
 		editingImage.set(null);
 	}
 
@@ -82,58 +80,53 @@
 		}
 	}
 
-	function handleFileChange(e) {
-		const files =
-			e?.detail?.files ||
-			e?.detail?.acceptedFiles ||
-			e?.details?.acceptedFiles ||
-			e?.files ||
-			e?.acceptedFiles ||
-			[];
-		const f = files[0];
-		if (!f) return;
-		filePreview = URL.createObjectURL(f);
-		bgUrl = filePreview;
+	function handleFileChange(event) {
+		URL.revokeObjectURL(filePreview);
+		const file = event.currentTarget.files[0];
+		filePreview = file ? URL.createObjectURL(file) : '';
 	}
 
-	function handleMapClick(e) {
-		latLocal = parseFloat(e.latlng.lat.toFixed(6));
-		lonLocal = parseFloat(e.latlng.lng.toFixed(6));
+	function applyMapLocation({ lat, lng }) {
+		latLocal = Number(lat.toFixed(6));
+		lonLocal = Number(lng.toFixed(6));
 		gpsJustApplied = true;
 		setTimeout(() => (gpsJustApplied = false), 2000);
 	}
 
 	function applyGpsToSearch() {
-		if (!latLocal || !lonLocal) return;
+		if (!Number.isFinite(latLocal) || !Number.isFinite(lonLocal)) return;
 		searchQuery = `${latLocal.toFixed(4)}, ${lonLocal.toFixed(4)}`;
 	}
 </script>
 
 {#if $editingImage}
 	<div
-		class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+		class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm"
 		transition:fade={{ duration: 200 }}
 		onkeydown={handleEscape}
 		role="dialog"
 		aria-modal="true"
+		aria-labelledby="image-editor-title"
 		tabindex="-1"
 	>
 		<div
-			class="relative w-full max-w-4xl rounded-2xl border border-surface-500/30 bg-surface-900/90 shadow-2xl overflow-hidden flex flex-col md:flex-row h-full max-h-[90vh]"
+			class="relative flex h-full max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-surface-500/30 bg-surface-900/90 shadow-2xl md:flex-row"
 			style={`background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${bgUrl}'); background-size: cover; background-position: center;`}
 		>
 			<!-- Left side: Form -->
-			<div class="flex-1 p-6 md:p-8 bg-black/40 backdrop-blur-md overflow-y-auto">
-				<h2 class="h2 mb-6 text-white font-bold">{_isCreate ? 'Add' : 'Edit'} Image</h2>
+			<div class="flex-1 overflow-y-auto bg-black/40 p-6 backdrop-blur-md md:p-8">
+				<h2 id="image-editor-title" class="mb-6 h2 font-bold text-white">
+					{isCreate ? 'Add' : 'Edit'} Image
+				</h2>
 
 				{#if errorMessage}
 					<div class="alert variant-filled-error mb-6">{errorMessage}</div>
 				{/if}
 
 				<form
-					bind:this={formElement}
 					method="POST"
-					action="?/saveImage"
+					action={isCreate ? '?/upload' : '?/update'}
+					enctype="multipart/form-data"
 					use:enhance={() => {
 						pending = true;
 						errorMessage = '';
@@ -160,8 +153,8 @@
 					<input type="hidden" name="tags" value={tagsLocal.join(',')} />
 
 					<div>
-						<label class="block text-white mb-1">
-							<span class="block mb-1">Title:</span>
+						<label class="mb-1 block text-white">
+							<span class="mb-1 block">Title:</span>
 							<input
 								type="text"
 								name="title"
@@ -174,8 +167,8 @@
 					</div>
 
 					<div>
-						<label class="block text-white mb-1">
-							<span class="block mb-1">Description:</span>
+						<label class="mb-1 block text-white">
+							<span class="mb-1 block">Description:</span>
 							<textarea
 								name="description"
 								rows="3"
@@ -186,7 +179,7 @@
 						</label>
 					</div>
 					<div>
-						<span class="block text-white font-medium mb-1">Categories:</span>
+						<span class="mb-1 block font-medium text-white">Categories:</span>
 						<div class="flex flex-wrap gap-1">
 							{#each allowedTags as tag}
 								<button
@@ -202,8 +195,8 @@
 
 					<div class="grid grid-cols-2 gap-4">
 						<div>
-							<label class="block text-white mb-1">
-								<span class="block mb-1">Latitude:</span>
+							<label class="mb-1 block text-white">
+								<span class="mb-1 block">Latitude:</span>
 								<input
 									type="number"
 									name="lat"
@@ -215,8 +208,8 @@
 							</label>
 						</div>
 						<div>
-							<label class="block text-white mb-1">
-								<span class="block mb-1">Longitude:</span>
+							<label class="mb-1 block text-white">
+								<span class="mb-1 block">Longitude:</span>
 								<input
 									type="number"
 									name="lon"
@@ -229,30 +222,18 @@
 						</div>
 					</div>
 
-					{#if _isCreate}
+					{#if isCreate}
 						<div class="space-y-2">
-							<label class="block text-white mb-1">
-								<span class="block mb-1">Upload Image:</span>
-								<FileUpload
-									name="file"
+							<label class="mb-1 block text-white">
+								<span class="mb-1 block">Upload Image:</span>
+								<input
+									type="file"
+									name="image"
 									accept="image/*"
-									maxFiles={1}
-									onFileChange={handleFileChange}
-									class="bg-white/5 border-dashed border-white/20"
-								>
-									{#snippet item(file)}
-										<div class="flex items-center gap-2 text-white">
-											<IconFile size={16} />
-											<span class="text-sm truncate">{file.name}</span>
-										</div>
-									{/snippet}
-									{#snippet placeholder()}
-										<div class="flex flex-col items-center py-4 text-white/60">
-											<IconDropzone size={32} class="mb-2" />
-											<p class="text-sm">Click or drag image to upload</p>
-										</div>
-									{/snippet}
-								</FileUpload>
+									required
+									onchange={handleFileChange}
+									class="input preset-filled-surface-900-100"
+								/>
 							</label>
 						</div>
 					{/if}
@@ -260,7 +241,7 @@
 					<div class="flex items-center gap-4 pt-4">
 						<button
 							type="submit"
-							class="btn preset-filled-primary-500 flex-1 font-bold"
+							class="btn flex-1 preset-filled-primary-500 font-bold"
 							disabled={pending}
 						>
 							{#if pending}
@@ -271,7 +252,7 @@
 						</button>
 						<button
 							type="button"
-							class="btn preset-outlined-white"
+							class="preset-outlined-white btn"
 							onclick={closeModal}
 							disabled={pending}
 						>
@@ -282,14 +263,14 @@
 			</div>
 
 			<!-- Right side: Map -->
-			<div class="hidden md:flex flex-1 flex-col bg-surface-900/40 relative">
+			<div class="relative hidden flex-1 flex-col bg-surface-900/40 md:flex">
 				<div class="absolute inset-0 flex flex-col">
-					<div class="p-4 bg-black/60 backdrop-blur-md z-10 border-b border-white/10">
+					<div class="z-10 border-b border-white/10 bg-black/60 p-4 backdrop-blur-md">
 						<div class="flex gap-2">
 							<input
 								type="text"
 								placeholder="Search for a location..."
-								class="input preset-filled-surface-900-100 flex-1 !py-1 text-sm"
+								class="input flex-1 preset-filled-surface-900-100 !py-1 text-sm"
 								bind:value={searchQuery}
 								onkeydown={(e) => e.key === 'Enter' && searchLocation()}
 							/>
@@ -298,7 +279,7 @@
 							</button>
 						</div>
 						{#if gpsJustApplied}
-							<p class="text-xs text-green-400 mt-2 font-medium" transition:fade>
+							<p class="mt-2 text-xs font-medium text-green-400" transition:fade>
 								✓ Location updated from map
 							</p>
 						{/if}
@@ -306,20 +287,24 @@
 
 					<div class="flex-1 bg-surface-800">
 						{#if MapComponent}
-							<MapComponent lat={latLocal || 0} lon={lonLocal || 0} on:click={handleMapClick} />
+							<MapComponent
+								lat={latLocal || 0}
+								lon={lonLocal || 0}
+								onLocationChange={applyMapLocation}
+							/>
 						{:else}
-							<div class="w-full h-full flex items-center justify-center text-white/30">
+							<div class="flex h-full w-full items-center justify-center text-white/30">
 								Loading interactive map...
 							</div>
 						{/if}
 					</div>
 
-					<div class="p-4 bg-black/60 backdrop-blur-md z-10 border-t border-white/10 text-center">
-						<p class="text-[10px] text-white/50 uppercase tracking-widest mb-2">
+					<div class="z-10 border-t border-white/10 bg-black/60 p-4 text-center backdrop-blur-md">
+						<p class="mb-2 text-[10px] tracking-widest text-white/50 uppercase">
 							Pro Tip: Click the map to set GPS
 						</p>
 						<button
-							class="btn btn-sm preset-outlined-tertiary-500 w-full flex items-center justify-center gap-2"
+							class="btn flex w-full items-center justify-center gap-2 preset-outlined-tertiary-500 btn-sm"
 							onclick={applyGpsToSearch}
 						>
 							<Wand2 size={12} />

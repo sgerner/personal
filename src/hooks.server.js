@@ -1,15 +1,21 @@
-// JS only; remove TS annotations
-import { redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
+import { ADMIN_SESSION_COOKIE, isAdminSession } from '$lib/server/admin-session';
 
 export async function handle({ event, resolve }) {
-	if (event.url.pathname.startsWith('/admin')) {
-		if (event.url.pathname !== '/admin/login') {
-			const session = event.cookies.get('session');
-			if (session !== 'loggedin') {
-				throw redirect(303, '/admin/login');
-			}
-		}
+	const pathname = event.url.pathname;
+	if (pathname !== '/admin' && !pathname.startsWith('/admin/')) return resolve(event);
+
+	const robots = { 'X-Robots-Tag': 'noindex, nofollow' };
+	if (
+		pathname !== '/admin/login' &&
+		!isAdminSession(event.cookies.get(ADMIN_SESSION_COOKIE), env.ADMIN_PASSWORD)
+	) {
+		return new Response(null, {
+			status: 303,
+			headers: { ...robots, location: '/admin/login' }
+		});
 	}
 
+	event.setHeaders(robots);
 	return resolve(event);
 }

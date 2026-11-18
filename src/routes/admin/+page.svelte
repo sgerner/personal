@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import { editingImage } from '$lib/stores/modal';
 	import EditImageModal from '$lib/components/admin/EditImageModal.svelte';
@@ -8,23 +8,25 @@
 	import GlassPanel from '$lib/components/ui/GlassPanel.svelte';
 	import { Pencil, Trash2 } from '@lucide/svelte';
 
-	let geoFilter = 'all'; // 'all' | 'with' | 'without'
-	$: imagesFiltered = $page.data.images.filter((img) => {
-		const lat = img?.gps?.lat;
-		const lon = img?.gps?.lon;
-		const hasGPS =
-			typeof lat === 'number' &&
-			typeof lon === 'number' &&
-			!Number.isNaN(lat) &&
-			!Number.isNaN(lon) &&
-			!(lat === 0 && lon === 0);
-		if (geoFilter === 'with') return hasGPS;
-		if (geoFilter === 'without') return !hasGPS;
-		return true;
-	});
+	let geoFilter = $state('all'); // 'all' | 'with' | 'without'
+	const imagesFiltered = $derived(
+		(page.data.images ?? []).filter((img) => {
+			const lat = img?.gps?.lat;
+			const lon = img?.gps?.lon;
+			const hasGPS =
+				typeof lat === 'number' &&
+				typeof lon === 'number' &&
+				!Number.isNaN(lat) &&
+				!Number.isNaN(lon) &&
+				!(lat === 0 && lon === 0);
+			if (geoFilter === 'with') return hasGPS;
+			if (geoFilter === 'without') return !hasGPS;
+			return true;
+		})
+	);
 </script>
 
-<EditImageModal />
+<EditImageModal allowedTags={page.data.tags ?? []} />
 <StatusToast />
 
 <div class="container mx-auto p-4">
@@ -38,26 +40,26 @@
 	<div class="mb-6 flex flex-wrap items-center gap-3">
 		<button
 			class={`btn ${geoFilter === 'all' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
-			on:click={() => (geoFilter = 'all')}
+			onclick={() => (geoFilter = 'all')}
 		>
 			All
 		</button>
 		<button
 			class={`btn ${geoFilter === 'with' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
-			on:click={() => (geoFilter = 'with')}
+			onclick={() => (geoFilter = 'with')}
 		>
 			Has GPS
 		</button>
 		<button
 			class={`btn ${geoFilter === 'without' ? 'preset-tonal-secondary' : 'preset-outlined-surface-500'}`}
-			on:click={() => (geoFilter = 'without')}
+			onclick={() => (geoFilter = 'without')}
 		>
 			No GPS
 		</button>
 		<div class="ml-auto">
 			<button
 				class="btn preset-filled-primary-500"
-				on:click={() =>
+				onclick={() =>
 					editingImage.set({
 						mode: 'create',
 						title: '',
@@ -79,7 +81,7 @@
 					<img src={image.urls.thumb} alt={image.title} class="h-48 w-full object-cover" />
 					<div class="absolute top-2 right-2 flex space-x-2">
 						<button
-							on:click={() => editingImage.set(image)}
+							onclick={() => editingImage.set(image)}
 							class="btn-icon preset-filled-secondary-500"
 						>
 							<Pencil size={20} />

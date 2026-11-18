@@ -1,7 +1,6 @@
-// JS only; remove TS annotations
 import { SITE_URL } from '$lib/config/site';
 
-const routes = ['/', '/gallery', '/bakery', '/advocacy', '/projects', '/about'];
+const routes = ['/', '/gallery', '/advocacy', '/projects'];
 
 export async function GET() {
 	const headers = {
@@ -9,30 +8,13 @@ export async function GET() {
 		'Content-Type': 'application/xml'
 	};
 
-	const sitemap = `
-		<?xml version="1.0" encoding="UTF-8" ?>
-		<urlset
-			xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
-			xmlns:xhtml="https://www.w3.org/1999/xhtml"
-			xmlns:mobile="https://www.google.com/schemas/sitemap-mobile/1.0"
-			xmlns:news="https://www.google.com/schemas/sitemap-news/0.9"
-			xmlns:image="https://www.google.com/schemas/sitemap-image/1.1"
-			xmlns:video="https://www.google.com/schemas/sitemap-video/1.1"
-		>
-			${routes
-				.map(
-					(route) => `
-				<url>
-					<loc>${SITE_URL}${route}</loc>
-					<lastmod>${new Date().toISOString()}</lastmod>
-					<changefreq>daily</changefreq>
-					<priority>0.7</priority>
-				</url>
-			`
-				)
-				.join('')}
-		</urlset>
-	`.trim();
+	const urls = routes.map((route) => `  <url><loc>${SITE_URL}${route}</loc></url>`);
+	const sitemap = [
+		'<?xml version="1.0" encoding="UTF-8"?>',
+		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+		...urls,
+		'</urlset>'
+	].join('\n');
 
 	return new Response(sitemap, { headers });
 }

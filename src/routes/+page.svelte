@@ -94,7 +94,7 @@
 	<GalleryLightbox
 		images={bakeryImages}
 		startIndex={lightboxIndex}
-		on:close={() => (lightboxIndex = null)}
+		onclose={() => (lightboxIndex = null)}
 	/>
 {/if}
 
@@ -173,7 +173,7 @@
 	<!-- Scroll indicator -->
 	<button
 		onclick={scrollToAbout}
-		class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-white/50 transition hover:text-white/80"
+		class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-white transition hover:text-secondary-300"
 		class:opacity-0={!heroVisible}
 		style="transition: opacity 1s ease; transition-delay: 900ms; opacity: {heroVisible ? 1 : 0}"
 		aria-label="Scroll down"
@@ -264,11 +264,7 @@
 			class:opacity-0={!passionsVisible}
 			class:translate-y-8={!passionsVisible}
 		>
-			<p
-				class="mb-2 text-xs font-bold tracking-[0.2em] text-[#526900] uppercase dark:text-secondary-300"
-			>
-				What I do
-			</p>
+			<p class="mb-2 text-xs font-bold tracking-[0.2em] text-secondary-300 uppercase">What I do</p>
 			<h2 class="text-3xl font-black text-white">Passion projects</h2>
 		</div>
 
@@ -311,9 +307,7 @@
 			<div class="grid grid-cols-1 gap-0 md:grid-cols-2">
 				<!-- Text side -->
 				<div class="flex flex-col justify-center p-8 md:p-12">
-					<p
-						class="mb-2 text-xs font-bold tracking-[0.2em] text-[#526900] uppercase dark:text-secondary-300"
-					>
+					<p class="mb-2 text-xs font-bold tracking-[0.2em] text-secondary-300 uppercase">
 						Food that makes you happy
 					</p>
 					<h2 class="mb-4 text-4xl font-black text-slate-950 dark:text-white">

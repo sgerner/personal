@@ -1,11 +1,9 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { X, ChevronLeft, ChevronRight, Info } from '@lucide/svelte';
 
-	let { images = [], startIndex = 0 } = $props();
-	const dispatch = createEventDispatcher();
+	let { images = [], startIndex = 0, onclose } = $props();
 
 	let currentIndex = $state(0);
 
@@ -106,14 +104,14 @@
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			if (showDetails) showDetails = false;
-			else dispatch('close');
+			else onclose?.();
 		} else if (event.key === 'ArrowRight') {
 			event.preventDefault();
 			nextImage();
 		} else if (event.key === 'ArrowLeft') {
 			event.preventDefault();
 			prevImage();
-		} else if (event.key === 'i') showDetails = !showDetails;
+		} else if (event.key === 'i' && hasDetails) showDetails = !showDetails;
 	}
 
 	// Touch swipe support
@@ -127,15 +125,13 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
 <!-- Full-screen backdrop -->
 <div
 	bind:this={dialogEl}
 	class="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-md"
 	onclick={() => {
 		if (showDetails) showDetails = false;
-		else dispatch('close');
+		else onclose?.();
 	}}
 	onkeydown={handleKeydown}
 	ontouchstart={onTouchStart}
@@ -190,7 +186,7 @@
 			       focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
 			onclick={(e) => {
 				e.stopPropagation();
-				dispatch('close');
+				onclose?.();
 			}}
 			aria-label="Close lightbox"
 		>

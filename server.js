@@ -1,7 +1,6 @@
-import fs from 'fs/promises';
-import fssync from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import express from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
@@ -10,11 +9,9 @@ import helmet from 'helmet';
 import compression from 'compression';
 import slugify from 'slugify';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const PORT = process.env.PORT || 3000;
-const AUTH_TOKEN = process.env.AUTH_TOKEN || '';
+const AUTH_TOKEN = process.env.AUTH_TOKEN?.trim();
+const authTokenBytes = Buffer.from(AUTH_TOKEN || '');
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const OUTPUT_DIR = path.join(DATA_DIR, 'processed-images');
 const MANIFEST_PATH = path.join(DATA_DIR, 'manifest.json');
@@ -25,18 +22,53 @@ const supported = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.tiff', '.
 
 await fs.mkdir(OUTPUT_DIR, { recursive: true });
 await fs.mkdir(TMP_DIR, { recursive: true });
-if (!fssync.existsSync(MANIFEST_PATH)) await fs.writeFile(MANIFEST_PATH, '[]');
+try {
+	await fs.writeFile(MANIFEST_PATH, '[]', { flag: 'wx' });
+} catch (error) {
+	if (error.code !== 'EEXIST') throw error;
+}
 
 let manifestLock = Promise.resolve();
-const withLock = (fn) => {
-	const run = async () =>
-		fn().catch((e) => {
-			throw e;
-		});
-	const p = manifestLock.then(run, run);
-	manifestLock = p.catch(() => {});
-	return p;
-};
+function withLock(fn) {
+	const pending = manifestLock.then(fn);
+	manifestLock = pending.catch(() => {});
+	return pending;
+}
+
+async function readManifest() {
+	return JSON.parse(await fs.readFile(MANIFEST_PATH, 'utf-8'));
+}
+
+async function writeManifest(manifest) {
+	const tmpPath = path.join(TMP_DIR, `manifest-${randomUUID()}.json`);
+	try {
+		await fs.writeFile(tmpPath, JSON.stringify(manifest, null, 2));
+		await fs.rename(tmpPath, MANIFEST_PATH);
+	} catch (error) {
+		await fs.rm(tmpPath, { force: true });
+		throw error;
+	}
+}
+
+async function removeImages(urls) {
+	await Promise.all(
+		Object.values(urls).map(async (url) => {
+			if (typeof url !== 'string') return;
+			const filepath = path.join(OUTPUT_DIR, path.basename(url));
+			try {
+				await fs.rm(filepath, { force: true });
+			} catch (error) {
+				console.error(`Failed to delete file ${filepath}`, error);
+			}
+		})
+	);
+}
+
+function validGps(lat, lon) {
+	return (
+		Number.isFinite(lat) && Math.abs(lat) <= 90 && Number.isFinite(lon) && Math.abs(lon) <= 180
+	);
+}
 
 const upload = multer({
 	storage: multer.memoryStorage(),
@@ -48,7 +80,6 @@ app.set('trust proxy', true);
 app.use(helmet());
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
 app.use(compression());
-app.use(express.json());
 
 app.use(
 	'/processed-images',
@@ -74,41 +105,51 @@ app.get('/manifest.json', async (_req, res) => {
 
 function requireAuth(req, res, next) {
 	const hdr = req.get('authorization') || '';
-	const token = hdr.startsWith('Bearer ') ? hdr.slice(7) : '';
-	if (!AUTH_TOKEN || token === AUTH_TOKEN) return next();
+	if (!AUTH_TOKEN) return res.status(503).json({ error: 'image mutations unavailable' });
+
+	const token = Buffer.from(hdr.startsWith('Bearer ') ? hdr.slice(7) : '');
+	if (token.length === authTokenBytes.length && timingSafeEqual(token, authTokenBytes))
+		return next();
 	res.status(401).json({ error: 'unauthorized' });
 }
 
-app.put('/images/:id', requireAuth, async (req, res) => {
+app.put('/images/:id', requireAuth, express.json(), async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, description, tags, lat, lon } = req.body;
+		const { title, description, tags, lat, lon } = req.body ?? {};
+		if (
+			(title !== undefined && typeof title !== 'string') ||
+			(description !== undefined && typeof description !== 'string') ||
+			(tags !== undefined && (!Array.isArray(tags) || tags.some((tag) => typeof tag !== 'string')))
+		) {
+			return res.status(400).json({ error: 'invalid metadata' });
+		}
 
-		await withLock(async () => {
-			const text = await fs.readFile(MANIFEST_PATH, 'utf-8');
-			const manifest = JSON.parse(text);
-			const idx = manifest.findIndex((x) => x.id === id);
+		if (
+			(lat !== undefined || lon !== undefined) &&
+			!(lat === null && lon === null) &&
+			!validGps(lat, lon)
+		) {
+			return res.status(400).json({ error: 'invalid coordinates' });
+		}
 
-			if (idx === -1) {
-				return res.status(404).json({ error: 'image not found' });
-			}
+		const image = await withLock(async () => {
+			const manifest = await readManifest();
+			const entry = manifest.find((item) => item.id === id);
+			if (!entry) return null;
 
-			const updatedEntry = { ...manifest[idx] };
-			if (title) updatedEntry.title = title;
-			if (description) updatedEntry.description = description;
-			if (tags) updatedEntry.tags = tags;
-			if (lat && lon) {
-				updatedEntry.gps = { lat, lon };
-			}
+			if (typeof title === 'string') entry.title = title;
+			if (typeof description === 'string') entry.description = description;
+			if (tags !== undefined) entry.tags = tags;
+			if (lat === null && lon === null) delete entry.gps;
+			else if (validGps(lat, lon)) entry.gps = { lat, lon };
 
-			manifest[idx] = updatedEntry;
-
-			const tmpPath = path.join(TMP_DIR, `manifest-${Date.now()}.json`);
-			await fs.writeFile(tmpPath, JSON.stringify(manifest, null, 2));
-			await fs.rename(tmpPath, MANIFEST_PATH);
-
-			res.json({ ok: true, image: updatedEntry });
+			await writeManifest(manifest);
+			return entry;
 		});
+
+		if (!image) return res.status(404).json({ error: 'image not found' });
+		res.json({ ok: true, image });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: 'update_failed' });
@@ -118,39 +159,20 @@ app.put('/images/:id', requireAuth, async (req, res) => {
 app.delete('/images/:id', requireAuth, async (req, res) => {
 	try {
 		const { id } = req.params;
+		const urls = await withLock(async () => {
+			const manifest = await readManifest();
+			const idx = manifest.findIndex((item) => item.id === id);
+			if (idx === -1) return null;
 
-		await withLock(async () => {
-			const text = await fs.readFile(MANIFEST_PATH, 'utf-8');
-			let manifest = JSON.parse(text);
-			const idx = manifest.findIndex((x) => x.id === id);
-
-			if (idx === -1) {
-				return res.status(404).json({ error: 'image not found' });
-			}
-
-			const entry = manifest[idx];
-			const urls = Object.values(entry.urls);
-
-			for (const url of urls) {
-				const filename = path.basename(url);
-				const filepath = path.join(OUTPUT_DIR, filename);
-				try {
-					await fs.unlink(filepath);
-				} catch (e) {
-					if (e.code !== 'ENOENT') {
-						console.error(`Failed to delete file ${filepath}`, e);
-					}
-				}
-			}
-
-			manifest = manifest.filter((x) => x.id !== id);
-
-			const tmpPath = path.join(TMP_DIR, `manifest-${Date.now()}.json`);
-			await fs.writeFile(tmpPath, JSON.stringify(manifest, null, 2));
-			await fs.rename(tmpPath, MANIFEST_PATH);
-
-			res.json({ ok: true });
+			const [entry] = manifest.splice(idx, 1);
+			await writeManifest(manifest);
+			return entry.urls ?? {};
 		});
+
+		if (!urls) return res.status(404).json({ error: 'image not found' });
+
+		await removeImages(urls);
+		res.json({ ok: true });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: 'delete_failed' });
@@ -158,6 +180,8 @@ app.delete('/images/:id', requireAuth, async (req, res) => {
 });
 
 app.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
+	const urls = {};
+	let published = false;
 	try {
 		if (!req.file) return res.status(400).json({ error: 'no file' });
 
@@ -165,9 +189,15 @@ app.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 		const ext = path.extname(originalName).toLowerCase();
 		if (!supported.has(ext)) return res.status(400).json({ error: 'unsupported file type' });
 
+		const fields = ['id', 'title', 'description', 'tags', 'lat', 'lon'];
+		if (fields.some((key) => req.body[key] !== undefined && typeof req.body[key] !== 'string')) {
+			return res.status(400).json({ error: 'invalid metadata' });
+		}
+
 		const baseName = path.basename(originalName, ext);
 		const customId = (req.body.id || '').trim();
 		const id = slugify(customId || baseName, { lower: true, strict: true });
+		if (!id || id.length > 150) return res.status(400).json({ error: 'invalid image ID' });
 
 		const title = req.body.title || baseName;
 		const description = req.body.description || '';
@@ -175,28 +205,24 @@ app.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 			.split(',')
 			.map((s) => s.trim())
 			.filter(Boolean);
-		const lat = req.body.lat ? parseFloat(req.body.lat) : undefined;
-		const lon = req.body.lon ? parseFloat(req.body.lon) : undefined;
+		const lat = req.body.lat ? Number(req.body.lat) : undefined;
+		const lon = req.body.lon ? Number(req.body.lon) : undefined;
 
-		const inputSharp = sharp(req.file.buffer, { failOn: 'warning' }).rotate();
+		if ((lat !== undefined || lon !== undefined) && !validGps(lat, lon)) {
+			return res.status(400).json({ error: 'invalid coordinates' });
+		}
 
-		const originalNameOut = `${id}-original.webp`;
-		const originalPath = path.join(OUTPUT_DIR, originalNameOut);
-		await inputSharp.webp({ quality: 90 }).toFile(originalPath);
-
-		const urls = {
-			original: `/processed-images/${originalNameOut}`
-		};
-
-		for (const [size, width] of Object.entries(sizes)) {
-			const outName = `${id}-${size}.webp`;
-			const outPath = path.join(OUTPUT_DIR, outName);
-			await sharp(req.file.buffer)
-				.rotate()
-				.resize({ width, withoutEnlargement: true })
-				.webp({ quality: 80 })
-				.toFile(outPath);
+		// Publish new files under unique URLs so an upload cannot replace cached assets.
+		const prefix = `${id}-${randomUUID()}`;
+		const source = sharp(req.file.buffer, { failOn: 'warning' }).rotate();
+		for (const [size, width] of [['original', null], ...Object.entries(sizes)]) {
+			const outName = `${prefix}-${size}.webp`;
 			urls[size] = `/processed-images/${outName}`;
+			const variant = source.clone();
+			if (width !== null) variant.resize({ width, withoutEnlargement: true });
+			await variant
+				.webp({ quality: width === null ? 90 : 80 })
+				.toFile(path.join(OUTPUT_DIR, outName));
 		}
 
 		const now = new Date().toISOString();
@@ -209,25 +235,24 @@ app.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
 			urls
 		};
 
-		if (lat && lon) {
-			newEntry.gps = { lat, lon };
-		}
+		if (validGps(lat, lon)) newEntry.gps = { lat, lon };
 
-		await withLock(async () => {
-			const text = await fs.readFile(MANIFEST_PATH, 'utf-8');
-			const manifest = JSON.parse(text);
-			const idx = manifest.findIndex((x) => x.id === newEntry.id);
-			if (idx >= 0) manifest[idx] = { ...manifest[idx], ...newEntry };
-			else manifest.push(newEntry);
-			const tmpPath = path.join(TMP_DIR, `manifest-${Date.now()}.json`);
-			await fs.writeFile(tmpPath, JSON.stringify(manifest, null, 2));
-			await fs.rename(tmpPath, MANIFEST_PATH);
+		published = await withLock(async () => {
+			const manifest = await readManifest();
+			if (manifest.some((entry) => entry.id === id)) return false;
+
+			manifest.push(newEntry);
+			await writeManifest(manifest);
+			return true;
 		});
+		if (!published) return res.status(409).json({ error: 'an image with this ID already exists' });
 
 		res.json({ ok: true, id, urls });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: 'processing_failed' });
+	} finally {
+		if (!published) await removeImages(urls);
 	}
 });
 

@@ -1,5 +1,6 @@
 <script>
 	import '../app.css';
+	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { images } from '$lib/stores/images.js';
 	import NavBar from '$lib/components/nav/NavBar.svelte';
@@ -40,16 +41,23 @@
 </svelte:head>
 
 <div class="relative isolate min-h-screen">
-	<BackgroundRotator pool={backgroundPool} intervalMs={30000} />
+	{#if page.route.id === '/'}
+		<BackgroundRotator pool={backgroundPool} intervalMs={30000} />
+	{/if}
 	<div class="site-ambient pointer-events-none fixed inset-0 z-[1]" aria-hidden="true"></div>
 
 	<div class="relative z-10 flex min-h-screen">
+		<a
+			href="#main-content"
+			class="sr-only z-[60] rounded-md bg-slate-950 px-4 py-3 font-semibold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+			>Skip to main content</a
+		>
 		<NavBar />
 
 		<!-- Main Content Area -->
 		<div class="relative mb-16 flex min-h-screen max-w-full flex-grow flex-col md:mb-0 md:ml-4">
 			<!-- Add padding-bottom on mobile to avoid overlap with the bottom nav bar -->
-			<main class="flex-grow">
+			<main id="main-content" tabindex="-1" class="flex-grow">
 				{@render children?.()}
 			</main>
 			<Footer />

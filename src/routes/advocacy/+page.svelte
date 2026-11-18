@@ -128,15 +128,19 @@
 	>
 		<div>
 			<div class="advocate-line mb-6 h-[3px] w-16 rounded-sm bg-secondary-500"></div>
-			<p class="mb-3 text-xs font-bold tracking-[0.35em] text-secondary-300 uppercase">
+			<p
+				class="mb-3 text-xs font-bold tracking-[0.35em] text-lime-800 uppercase dark:text-secondary-300"
+			>
 				Streets worth loving
 			</p>
 			<h1
-				class="max-w-3xl text-5xl leading-[0.94] font-extrabold tracking-tight text-white drop-shadow-xl sm:text-7xl lg:text-8xl"
+				class="max-w-3xl text-5xl leading-[0.94] font-extrabold tracking-tight text-slate-950 sm:text-7xl lg:text-8xl dark:text-white"
 			>
-				Cycling<br /><span class="text-secondary-300">Advocacy</span>
+				Cycling<br /><span class="text-lime-800 dark:text-secondary-300">Advocacy</span>
 			</h1>
-			<p class="mt-6 max-w-xl text-lg leading-relaxed text-white/85 sm:text-xl">
+			<p
+				class="mt-6 max-w-xl text-lg leading-relaxed text-slate-700 sm:text-xl dark:text-slate-200"
+			>
 				Fighting for streets where biking, walking, and rolling feel natural — and helping more
 				people feel at home on a bike.
 			</p>
@@ -150,24 +154,24 @@
 				</a>
 				<a
 					href="#partners"
-					class="inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-white/20"
+					class="inline-flex items-center gap-2 rounded-md border border-slate-900/20 bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/30 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
 				>
 					Meet the partners
 				</a>
 			</div>
 			<div
-				class="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/20 pt-5 text-white/80"
+				class="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-slate-900/15 pt-5 text-slate-700 dark:border-white/20 dark:text-slate-200"
 			>
 				<div>
-					<MapPin size={17} class="mb-2 text-secondary-300" />
+					<MapPin size={17} class="mb-2 text-lime-800 dark:text-secondary-300" />
 					<p class="text-xs font-bold tracking-[0.16em] uppercase">Tempe, AZ</p>
 				</div>
 				<div>
-					<GraduationCap size={17} class="mb-2 text-secondary-300" />
+					<GraduationCap size={17} class="mb-2 text-lime-800 dark:text-secondary-300" />
 					<p class="text-xs font-bold tracking-[0.16em] uppercase">LAB certified</p>
 				</div>
 				<div>
-					<HeartHandshake size={17} class="mb-2 text-secondary-300" />
+					<HeartHandshake size={17} class="mb-2 text-lime-800 dark:text-secondary-300" />
 					<p class="text-xs font-bold tracking-[0.16em] uppercase">Open to all</p>
 				</div>
 			</div>
@@ -197,7 +201,7 @@
 				<div>
 					<p class="text-2xl font-black text-secondary-700 dark:text-secondary-300">01</p>
 					<p
-						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase dark:text-white/55"
+						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-700 uppercase dark:text-slate-200"
 					>
 						Learn
 					</p>
@@ -205,7 +209,7 @@
 				<div>
 					<p class="text-2xl font-black text-secondary-700 dark:text-secondary-300">02</p>
 					<p
-						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase dark:text-white/55"
+						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-700 uppercase dark:text-slate-200"
 					>
 						Connect
 					</p>
@@ -213,7 +217,7 @@
 				<div>
 					<p class="text-2xl font-black text-secondary-700 dark:text-secondary-300">03</p>
 					<p
-						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase dark:text-white/55"
+						class="mt-1 text-[10px] font-bold tracking-[0.14em] text-slate-700 uppercase dark:text-slate-200"
 					>
 						Act
 					</p>
@@ -290,7 +294,7 @@
 			What better streets unlock
 		</p>
 		<h2
-			class="mx-auto max-w-2xl text-center text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+			class="mx-auto max-w-2xl text-center text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
 		>
 			More freedom in the everyday.
 		</h2>
@@ -307,7 +311,7 @@
 							<OutcomeIcon size={22} />
 						</div>
 						<span
-							class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase dark:text-white/50"
+							class="text-[10px] font-bold tracking-[0.2em] text-slate-700 uppercase dark:text-slate-200"
 							>{outcome.eyebrow}</span
 						>
 					</div>
@@ -331,11 +335,13 @@
 				>
 					Organizations I support
 				</p>
-				<h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+				<h2
+					class="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
+				>
 					Advocacy partners
 				</h2>
 			</div>
-			<p class="max-w-md text-sm leading-relaxed text-white/70 sm:text-right">
+			<p class="max-w-md text-sm leading-relaxed text-slate-700 sm:text-right dark:text-slate-200">
 				Different roles, same goal: streets that help people participate in their own communities.
 			</p>
 		</div>
@@ -397,10 +403,10 @@
 			>
 				Start where you are
 			</p>
-			<h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+			<h2 class="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl dark:text-white">
 				There’s a useful next step for every kind of rider.
 			</h2>
-			<p class="mt-4 text-base leading-relaxed text-white/70">
+			<p class="mt-4 text-base leading-relaxed text-slate-700 dark:text-slate-200">
 				You do not need to be an expert or a full-time activist. Pick the move that feels useful
 				now, and we can build from there.
 			</p>
@@ -459,7 +465,7 @@
 					<GraduationCap size={40} />
 				</div>
 				<span
-					class="text-center text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase lg:text-left dark:text-white/50"
+					class="text-center text-[10px] font-bold tracking-[0.2em] text-slate-700 uppercase lg:text-left dark:text-slate-200"
 					>Practical education</span
 				>
 			</div>

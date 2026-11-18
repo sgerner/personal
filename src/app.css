@@ -13,8 +13,14 @@
 html,
 body {
 	@apply h-full overflow-x-hidden;
+	background: #f8fafc;
+	color: #0f172a;
+}
+
+html[data-mode='dark'],
+html[data-mode='dark'] body {
 	background: #0b0912;
-	color: white;
+	color: #f8fafc;
 }
 
 .site-ambient {

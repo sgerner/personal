@@ -29,6 +29,7 @@
 
 <div
 	class="mx-auto flex max-w-6xl flex-nowrap items-center justify-start gap-1.5 overflow-x-auto rounded-md bg-white/60 p-2 shadow-sm shadow-black/5 backdrop-blur-md md:flex-wrap md:justify-center dark:bg-slate-950/55 dark:shadow-black/15"
+	role="group"
 	aria-label="Filter gallery by tag"
 >
 	{#if showAll}

@@ -126,22 +126,26 @@
 	<GalleryLightbox
 		images={projectImages}
 		startIndex={lightboxIndex}
-		on:close={() => (lightboxIndex = null)}
+		onclose={() => (lightboxIndex = null)}
 	/>
 {/if}
 
 <div class="container mx-auto px-4 pb-16 sm:px-6">
 	<header
-		class="mx-auto flex max-w-5xl flex-col justify-end border-b border-white/20 py-16 text-left sm:py-20"
+		class="mx-auto flex max-w-5xl flex-col justify-end border-b border-slate-900/15 py-16 text-left sm:py-20 dark:border-white/20"
 	>
-		<p class="mb-3 text-xs font-bold tracking-[0.3em] text-secondary-300 uppercase">
+		<p
+			class="mb-3 text-xs font-bold tracking-[0.3em] text-lime-800 uppercase dark:text-secondary-300"
+		>
 			Selected builds
 		</p>
-		<h1 class="w-full text-5xl font-black tracking-tight text-white drop-shadow-sm sm:text-7xl">
+		<h1
+			class="w-full text-5xl font-black tracking-tight text-slate-950 sm:text-7xl dark:text-white"
+		>
 			Projects
 		</h1>
 		<div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-			<p class="max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+			<p class="max-w-2xl text-base leading-relaxed text-slate-700 sm:text-lg dark:text-slate-200">
 				Tools, products, and experiments across memory, media, food, and mobility.
 			</p>
 		</div>
@@ -149,7 +153,7 @@
 
 	<div class="mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 		{#each projects as project, i}
-			<ProjectCard {...project} on:view={() => (lightboxIndex = i)} />
+			<ProjectCard {...project} onview={() => (lightboxIndex = i)} />
 		{/each}
 	</div>
 </div>

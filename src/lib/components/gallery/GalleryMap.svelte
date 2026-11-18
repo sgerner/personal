@@ -1,5 +1,5 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import 'leaflet/dist/leaflet.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -12,6 +12,16 @@
 	let markersLayer;
 	let selectedIndex = $state(null);
 	let L; // Leaflet (loaded on client)
+	const markerSize = 72;
+	const clusterSize = 48;
+
+	function thumbnail(src, className) {
+		const image = document.createElement('img');
+		image.className = className;
+		if (src) image.src = src;
+		image.alt = '';
+		return image;
+	}
 
 	function hasGPS(img) {
 		const lat = img?.gps?.lat;
@@ -25,102 +35,94 @@
 		);
 	}
 
-	let didFitBounds = false;
-
 	// Clustered marker builder (uses leaflet.markercluster)
-	function buildMarkersCluster({ initial = false, recenter = false } = {}) {
+	function buildMarkersCluster() {
 		if (!map || !L) return;
-		if (markersLayer) {
-			try {
-				markersLayer.clearLayers();
-				map.removeLayer(markersLayer);
-			} catch {
-				/* empty */
-			}
-			markersLayer = null;
-		}
+		markersLayer?.remove();
 		// @ts-ignore plugin augments L
 		markersLayer = L.markerClusterGroup({
 			showCoverageOnHover: false,
-			maxClusterRadius: 50,
+			maxClusterRadius: markerSize,
 			spiderfyOnMaxZoom: true,
-			disableClusteringAtZoom: 12,
+			spiderfyDistanceMultiplier: 3,
 			iconCreateFunction: (cluster) => {
 				const count = cluster.getChildCount();
-				const child = cluster.getAllChildMarkers()[0];
-				const src = (child && child.options && child.options.thumb) || '';
-				const html = `
-            <div class="cluster-thumb">
-              <img class="cluster-img" src="${src}" alt="" />
-              <span class="cluster-count">${count}</span>
-            </div>
-          `;
+				const src = cluster.getAllChildMarkers()[0]?.options.thumb;
+				const html = document.createElement('div');
+				html.className = 'cluster-thumb';
+				const badge = document.createElement('span');
+				badge.className = 'cluster-count';
+				badge.textContent = count;
+				html.append(thumbnail(src, 'cluster-img'), badge);
 				return L.divIcon({
 					html,
 					className: 'cluster-icon',
-					iconSize: [36, 36],
-					iconAnchor: [18, 18]
+					iconSize: [clusterSize, clusterSize],
+					iconAnchor: [clusterSize / 2, clusterSize / 2]
 				});
 			}
 		});
-		markersLayer.addTo(map);
-
 		const bounds = [];
+		const markers = [];
 		images.forEach((img, idx) => {
 			if (!hasGPS(img)) return;
 			const { lat, lon } = img.gps;
 			const src = encodeURI(
 				img.urls?.thumb || img.urls?.sm || img.urls?.md || img.urls?.original || ''
 			);
-			const alt = (img.title || '').replace(/"/g, '&quot;');
-			const html = `<div class="thumb-marker"><img class="thumb-img" src="${src}" alt="${alt}"></div>`;
 			const icon = L.divIcon({
-				html,
+				html: thumbnail(src, 'thumb-img'),
 				className: 'thumb-icon',
-				iconSize: [22, 22],
-				iconAnchor: [11, 11]
+				iconSize: [markerSize, markerSize],
+				iconAnchor: [markerSize / 2, markerSize / 2]
 			});
-			const marker = L.marker([lat, lon], { icon, thumb: src });
+			const marker = L.marker([lat, lon], {
+				icon,
+				thumb: src,
+				title: img.title || 'Open photograph'
+			});
 			marker.on('click', () => {
 				selectedIndex = idx;
 			});
-			// @ts-ignore plugin augments L
-			markersLayer.addLayer(marker);
+			markers.push(marker);
 			bounds.push([lat, lon]);
 		});
 
-		if (bounds.length && ((initial && !didFitBounds) || recenter)) {
-			try {
-				map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-			} catch {
-				/* empty */
-			}
-			if (initial) didFitBounds = true;
+		markersLayer.addLayers(markers).addTo(map);
+		if (bounds.length) {
+			map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
 		}
 	}
 
-	onMount(async () => {
-		const mod = await import('leaflet');
-		L = mod.default || mod;
-		await import('leaflet.markercluster');
-		map = L.map(mapEl, { scrollWheelZoom: true, zoomControl: true }).setView([20, 0], 2);
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution:
-				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-		}).addTo(map);
-		// Rebuild clusters only on zoom changes (not panning) to reduce churn
-		map.on('zoomend', () => buildMarkersCluster());
-		buildMarkersCluster({ initial: true });
-	});
+	onMount(() => {
+		let active = true;
 
-	onDestroy(() => {
-		if (map) map.remove();
+		async function initializeMap() {
+			const mod = await import('leaflet');
+			await import('leaflet.markercluster');
+			if (!active) return;
+
+			L = mod.default || mod;
+			map = L.map(mapEl, { scrollWheelZoom: true, zoomControl: true }).setView([20, 0], 2);
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution:
+					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(map);
+			buildMarkersCluster();
+		}
+
+		initializeMap();
+		return () => {
+			active = false;
+			map?.remove();
+			map = null;
+		};
 	});
 
 	$effect(() => {
 		// Rebuild and recenter when filtered images change
 		void images;
-		buildMarkersCluster({ recenter: true });
+		buildMarkersCluster();
 	});
 
 	function closeLightbox() {
@@ -131,20 +133,15 @@
 <div bind:this={mapEl} class="h-[65vh] w-full rounded-md shadow-lg"></div>
 
 {#if selectedIndex !== null}
-	<GalleryLightbox {images} startIndex={selectedIndex} on:close={closeLightbox} />
+	<GalleryLightbox {images} startIndex={selectedIndex} onclose={closeLightbox} />
 {/if}
 
 <style>
 	/* Marker thumbnails */
-	:global(.thumb-icon .thumb-marker) {
-		position: relative;
-		width: 72px;
-		height: 72px;
-	}
-	:global(.thumb-icon .thumb-img) {
+	:global(.leaflet-container .thumb-icon img.thumb-img) {
 		display: block;
-		width: 72px !important;
-		height: 72px !important;
+		width: 100%;
+		height: 100%;
 		object-fit: cover;
 		border-radius: 4px;
 		border: 1px solid rgba(255, 255, 255, 0.85);
@@ -155,13 +152,13 @@
 	/* Cluster icons */
 	:global(.cluster-icon .cluster-thumb) {
 		position: relative;
-		width: 48px;
-		height: 48px;
+		width: 100%;
+		height: 100%;
 		border-radius: 6px;
 		overflow: hidden;
 		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 	}
-	:global(.cluster-icon .cluster-img) {
+	:global(.leaflet-container .cluster-icon img.cluster-img) {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;

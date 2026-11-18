@@ -1,6 +1,7 @@
 <script>
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { SvelteMap } from 'svelte/reactivity';
 	import GalleryLightbox from './GalleryLightbox.svelte';
 
 	let { images = [] } = $props();
@@ -9,17 +10,7 @@
 	// Keep the incoming order stable so visitors can build a visual memory of the archive.
 	let displayImages = $derived(images);
 
-	// Track which images have finished loading
-	let loadedSet = $state(new Set());
-
-	$effect(() => {
-		// Reset loaded set when images change
-		loadedSet = new Set();
-	});
-
-	function onImageLoad(id) {
-		loadedSet = new Set([...loadedSet, id]);
-	}
+	const imageStatus = new SvelteMap();
 
 	function openLightbox(index) {
 		selectedIndex = index;
@@ -29,14 +20,13 @@
 		selectedIndex = null;
 	}
 
+	const responsiveWidths = { sm: 640, md: 768, lg: 1024, xl: 1280 };
+
 	function getSrcSet(urls) {
-		if (!urls) return '';
-		return `
-			${encodeURI(urls.sm)} 640w,
-			${encodeURI(urls.md)} 768w,
-			${encodeURI(urls.lg)} 1024w,
-			${encodeURI(urls.xl)} 1280w
-		`;
+		return Object.entries(responsiveWidths)
+			.filter(([size]) => urls[size])
+			.map(([size, width]) => `${encodeURI(urls[size])} ${width}w`)
+			.join(', ');
 	}
 
 	// Assign deterministic aspect ratio classes based on index for visual variety
@@ -58,7 +48,7 @@
 
 <div class="columns-1 gap-3 sm:columns-2 md:columns-3 lg:columns-4">
 	{#each displayImages as image, i (image.id)}
-		{@const isLoaded = loadedSet.has(image.id)}
+		{@const status = imageStatus.get(image)}
 		{@const aspect = getAspect(i)}
 		<div
 			class="mb-3 break-inside-avoid"
@@ -70,15 +60,23 @@
 				       focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900
 				       focus-visible:outline-none {aspect}"
 				onclick={() => openLightbox(i)}
-				aria-label="View {image.title || `image ${i + 1}`} in lightbox"
+				aria-label="View {image.title || `image ${i + 1}`} in lightbox{status === 'failed'
+					? ' (thumbnail unavailable)'
+					: ''}"
 			>
 				<!-- Skeleton placeholder: shown while loading -->
-				{#if !isLoaded}
+				{#if !status}
 					<div
 						class="absolute inset-0 {aspect} skeleton w-full"
 						aria-hidden="true"
 						transition:fade={{ duration: 200 }}
 					></div>
+				{:else if status === 'failed'}
+					<span
+						class="absolute inset-0 grid place-items-center bg-slate-900 px-4 text-sm text-white"
+					>
+						Thumbnail unavailable
+					</span>
 				{/if}
 
 				<picture class="block h-full w-full">
@@ -88,12 +86,18 @@
 						alt={image.title || image.description}
 						class="h-full w-full object-cover transition-all duration-700
 						       group-hover:scale-105 group-hover:brightness-90
-						       {isLoaded ? 'opacity-100' : 'opacity-0'}"
+						       {status === 'loaded' ? 'opacity-100' : 'opacity-0'}"
 						loading="lazy"
 						decoding="async"
 						draggable="false"
 						crossorigin="anonymous"
-						onload={() => onImageLoad(image.id)}
+						onload={() => imageStatus.set(image, 'loaded')}
+						onerror={() => imageStatus.set(image, 'failed')}
+						{@attach (element) => {
+							if (element.complete) {
+								imageStatus.set(image, element.naturalWidth > 0 ? 'loaded' : 'failed');
+							}
+						}}
 					/>
 				</picture>
 
@@ -122,5 +126,5 @@
 </div>
 
 {#if selectedIndex !== null}
-	<GalleryLightbox images={displayImages} startIndex={selectedIndex} on:close={closeLightbox} />
+	<GalleryLightbox images={displayImages} startIndex={selectedIndex} onclose={closeLightbox} />
 {/if}

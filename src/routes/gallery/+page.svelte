@@ -4,11 +4,14 @@
 	import FilterChips from '$lib/components/gallery/FilterChips.svelte';
 	import GalleryGrid from '$lib/components/gallery/GalleryGrid.svelte';
 	import GalleryMap from '$lib/components/gallery/GalleryMap.svelte';
-	import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
 	import { LayoutGrid, Map as MapIcon } from '@lucide/svelte';
 
 	let activeTags = $state([]);
-	let view = $state('grid'); // 'grid' | 'map'
+	const views = [
+		{ value: 'grid', label: 'Grid', icon: LayoutGrid },
+		{ value: 'map', label: 'Map', icon: MapIcon }
+	];
+	let view = $state('grid');
 	let sourceImages = $derived($images.images);
 	let filteredImages = $derived.by(() => {
 		if (activeTags.length === 0) return sourceImages;
@@ -35,48 +38,49 @@
 			<!-- Title block -->
 			<div class="mb-8">
 				<p
-					class="mb-1 text-xs font-semibold tracking-[0.3em] text-primary-400 uppercase opacity-80"
+					class="mb-1 text-xs font-semibold tracking-[0.3em] text-violet-800 uppercase dark:text-violet-200"
 				>
 					Portfolio
 				</p>
-				<h1 class="text-4xl font-extrabold tracking-tight text-white drop-shadow-lg sm:text-5xl">
+				<h1
+					class="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl dark:text-white"
+				>
 					Photography
 				</h1>
-				<p class="mt-1 text-sm font-medium tracking-[0.2em] text-secondary-400 uppercase">
+				<p
+					class="mt-1 text-sm font-medium tracking-[0.2em] text-lime-800 uppercase dark:text-secondary-300"
+				>
 					Gallery
 				</p>
 			</div>
 
 			<!-- View toggle -->
 			<div class="flex justify-center pb-2">
-				<SegmentedControl name="view" value={view} onValueChange={(e) => (view = e.value)}>
-					<SegmentedControl.Control
-						class="relative flex gap-1 rounded-md border border-white/20 bg-surface-100/30 p-1.5 shadow-xl backdrop-blur-lg dark:bg-surface-800/60"
-					>
-						<SegmentedControl.Indicator class="rounded-sm bg-primary-500 shadow-lg" />
-						<SegmentedControl.Item value="grid" class="z-10 w-24">
-							<SegmentedControl.ItemHiddenInput />
-							<SegmentedControl.ItemText
-								class="flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-white transition-colors"
+				<fieldset
+					class="flex gap-1 rounded-md border border-slate-900/15 bg-white p-1.5 shadow-sm dark:border-white/20 dark:bg-slate-900"
+				>
+					<legend class="sr-only">Gallery view</legend>
+					{#each views as { value, label, icon: Icon } (value)}
+						<label class="w-24">
+							<input
+								class="peer sr-only"
+								type="radio"
+								name="gallery-view"
+								{value}
+								bind:group={view}
+							/>
+							<span
+								class="flex cursor-pointer items-center justify-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium text-slate-800 transition-colors peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-violet-600 dark:text-slate-100 dark:peer-checked:bg-slate-100 dark:peer-checked:text-slate-950 dark:peer-focus-visible:ring-violet-300"
 							>
-								<LayoutGrid size={16} />
-								<span>Grid</span>
-							</SegmentedControl.ItemText>
-						</SegmentedControl.Item>
-						<SegmentedControl.Item value="map" class="z-10 w-24">
-							<SegmentedControl.ItemHiddenInput />
-							<SegmentedControl.ItemText
-								class="flex cursor-pointer items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-white transition-colors"
-							>
-								<MapIcon size={16} />
-								<span>Map</span>
-							</SegmentedControl.ItemText>
-						</SegmentedControl.Item>
-					</SegmentedControl.Control>
-				</SegmentedControl>
+								<Icon size={16} aria-hidden="true" />
+								{label}
+							</span>
+						</label>
+					{/each}
+				</fieldset>
 			</div>
 
-			<p class="mt-3 text-xs tracking-[0.2em] text-white/50 uppercase">
+			<p class="mt-3 text-xs tracking-[0.2em] text-slate-700 uppercase dark:text-slate-200">
 				{filteredImages.length} photographs
 			</p>
 		</div>
@@ -95,17 +99,19 @@
 	</div>
 
 	<!-- Content -->
-	<main class="px-3 pb-12 sm:px-4">
+	<div class="px-3 pb-12 sm:px-4">
 		{#if view === 'grid'}
 			{#if filteredImages.length > 0}
 				<GalleryGrid images={filteredImages} />
 			{:else}
-				<div class="rounded-lg border border-white/10 bg-black/30 p-12 text-center text-white/70">
+				<div
+					class="rounded-lg border border-slate-900/10 bg-white p-12 text-center text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+				>
 					No photographs match that filter yet.
 				</div>
 			{/if}
 		{:else}
 			<GalleryMap images={filteredImages} />
 		{/if}
-	</main>
+	</div>
 </div>

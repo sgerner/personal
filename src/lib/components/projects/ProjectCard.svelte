@@ -1,8 +1,5 @@
 <script>
 	import { ExternalLink, Github } from '@lucide/svelte';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
 
 	let {
 		title = 'Project Title',
@@ -11,7 +8,8 @@
 		githubUrl = null,
 		demoUrl = null,
 		image = null,
-		imageFit = 'cover'
+		imageFit = 'cover',
+		onview
 	} = $props();
 </script>
 
@@ -25,15 +23,18 @@
 		<p class="text-slate-600 dark:text-white/75">{description}</p>
 		<div class="mt-4 flex flex-wrap gap-2">
 			{#each tags as tag}
-				<span class="chip rounded-sm preset-tonal-primary">{tag}</span>
+				<span
+					class="chip rounded-sm bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+					>{tag}</span
+				>
 			{/each}
 		</div>
 	</div>
 	{#if image}
 		<button
 			type="button"
-			onclick={() => dispatch('view')}
-			class="mt-4 block w-full overflow-hidden rounded-md border border-slate-900/10 bg-slate-100 focus-visible:outline-none dark:border-white/10 dark:bg-slate-950/80"
+			onclick={onview}
+			class="mt-4 block w-full overflow-hidden rounded-md border border-slate-900/10 bg-slate-100 focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-slate-950/80 dark:focus-visible:ring-violet-300"
 			aria-label={`Open ${title} screenshot`}
 		>
 			<img
@@ -53,7 +54,7 @@
 				href={githubUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn flex items-center gap-2 preset-filled-secondary-500 btn-sm"
+				class="btn flex items-center gap-2 bg-lime-300 btn-sm text-slate-950 hover:bg-lime-200"
 				aria-label={`View ${title} on GitHub`}
 			>
 				<Github size={16} />
@@ -65,7 +66,7 @@
 				href={demoUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn flex items-center gap-2 preset-filled btn-sm"
+				class="btn flex items-center gap-2 bg-slate-900 btn-sm text-white dark:bg-slate-100 dark:text-slate-950"
 				aria-label={`Open ${title} demo`}
 			>
 				Live demo

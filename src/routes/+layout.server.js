@@ -47,7 +47,6 @@ function getPublicManifest(fetch) {
 
 export async function load({ fetch, route }) {
 	const isAdmin = route.id === '/admin';
-	if (!isAdmin && route.id !== '/' && route.id !== '/gallery') return { images: [], tags: [] };
 	let allImages;
 	try {
 		allImages = await (isAdmin ? fetchManifest(fetch) : getPublicManifest(fetch));

@@ -96,7 +96,6 @@
 			description: 'A digital volunteer sign-up app for cyclists.',
 			tags: ['SvelteKit', 'Svelte 4', 'Tailwind', 'Skeleton UI', 'Airtable'],
 			githubUrl: 'https://github.com/sgerner/tbag-airtable-volunteer-form',
-			demoUrl: 'https://tbag-volunteer.vercel.app/',
 			image: '/projects/tbag-volunteer.png'
 		},
 		{

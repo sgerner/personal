@@ -1,6 +1,7 @@
 <script>
 	import Seo from '$lib/components/meta/Seo.svelte';
 	import GlassPanel from '$lib/components/ui/GlassPanel.svelte';
+	import { SOCIAL_LINKS } from '$lib/config/site';
 	import {
 		ArrowRight,
 		ArrowUpRight,
@@ -17,6 +18,9 @@
 		Users
 	} from '@lucide/svelte';
 
+	const advocacyGuideUrl = 'https://3feetplease.org/advocacy/';
+	const safetyClassUrl = `${SOCIAL_LINKS.email}?subject=Bicycle%20Safety%20Class%20Inquiry`;
+
 	const advocacyLinks = [
 		{
 			href: 'https://3feetplease.org',
@@ -27,8 +31,8 @@
 			image: '/3fp.png'
 		},
 		{
-			href: 'https://learn.3feetplease.org',
-			title: 'Bicycle Advocacy Wiki',
+			href: advocacyGuideUrl,
+			title: 'Bicycle Advocacy Guide',
 			description: 'A practical resource for changing streets',
 			focus: 'Tools + ideas',
 			linkText: 'Change your community',
@@ -77,21 +81,21 @@
 			title: 'Learn to ride',
 			text: 'Build comfort, confidence, and practical street skills at your own pace.',
 			linkText: 'Ask about a free class',
-			href: 'mailto:steven@sgerner.com?subject=Bicycle%20Safety%20Class%20Inquiry'
+			href: safetyClassUrl
 		},
 		{
 			icon: Building2,
 			title: 'Bring a workshop',
 			text: 'Give your school, workplace, or community group a clearer path to safer riding.',
 			linkText: 'Plan a workshop',
-			href: 'mailto:steven@sgerner.com?subject=Bicycle%20Safety%20Workshop'
+			href: `${SOCIAL_LINKS.email}?subject=Bicycle%20Safety%20Workshop`
 		},
 		{
 			icon: Megaphone,
 			title: 'Advocate locally',
 			text: 'Find language, context, and momentum for streets that work for more people.',
 			linkText: 'Explore the playbook',
-			href: 'https://learn.3feetplease.org'
+			href: advocacyGuideUrl
 		},
 		{
 			icon: Users,
@@ -500,7 +504,7 @@
 				</div>
 
 				<a
-					href="mailto:steven@sgerner.com?subject=Bicycle%20Safety%20Class%20Inquiry"
+					href={safetyClassUrl}
 					class="mt-8 inline-flex items-center gap-2.5 rounded-md bg-secondary-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-secondary-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-secondary-300 hover:shadow-xl hover:shadow-secondary-500/40"
 				>
 					<Mail size={16} />
@@ -527,7 +531,7 @@
 			</p>
 		</div>
 		<a
-			href="mailto:steven@sgerner.com?subject=Let%27s%20talk%20about%20cycling%20advocacy"
+			href={`${SOCIAL_LINKS.email}?subject=Let%27s%20talk%20about%20cycling%20advocacy`}
 			class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
 		>
 			<Mail size={16} />

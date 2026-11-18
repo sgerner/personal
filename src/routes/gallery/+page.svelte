@@ -38,18 +38,14 @@
 			<!-- Title block -->
 			<div class="mb-8">
 				<p
-					class="mb-1 text-xs font-semibold tracking-[0.3em] text-violet-800 uppercase dark:text-violet-200"
+					class="mb-1 text-xs font-semibold tracking-[0.3em] text-primary-400 uppercase opacity-80"
 				>
 					Portfolio
 				</p>
-				<h1
-					class="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl dark:text-white"
-				>
+				<h1 class="text-4xl font-extrabold tracking-tight text-white drop-shadow-lg sm:text-5xl">
 					Photography
 				</h1>
-				<p
-					class="mt-1 text-sm font-medium tracking-[0.2em] text-lime-800 uppercase dark:text-secondary-300"
-				>
+				<p class="mt-1 text-sm font-medium tracking-[0.2em] text-secondary-400 uppercase">
 					Gallery
 				</p>
 			</div>
@@ -57,7 +53,7 @@
 			<!-- View toggle -->
 			<div class="flex justify-center pb-2">
 				<fieldset
-					class="flex gap-1 rounded-md border border-slate-900/15 bg-white p-1.5 shadow-sm dark:border-white/20 dark:bg-slate-900"
+					class="flex gap-1 rounded-md border border-white/20 bg-[#14121d]/80 p-1.5 shadow-xl backdrop-blur-lg"
 				>
 					<legend class="sr-only">Gallery view</legend>
 					{#each views as { value, label, icon: Icon } (value)}
@@ -70,7 +66,7 @@
 								bind:group={view}
 							/>
 							<span
-								class="flex cursor-pointer items-center justify-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium text-slate-800 transition-colors peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-violet-600 dark:text-slate-100 dark:peer-checked:bg-slate-100 dark:peer-checked:text-slate-950 dark:peer-focus-visible:ring-violet-300"
+								class="flex cursor-pointer items-center justify-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium text-white transition-colors peer-checked:bg-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-300"
 							>
 								<Icon size={16} aria-hidden="true" />
 								{label}
@@ -80,7 +76,7 @@
 				</fieldset>
 			</div>
 
-			<p class="mt-3 text-xs tracking-[0.2em] text-slate-700 uppercase dark:text-slate-200">
+			<p class="mt-3 text-xs tracking-[0.2em] text-white/80 uppercase">
 				{filteredImages.length} photographs
 			</p>
 		</div>
@@ -104,9 +100,7 @@
 			{#if filteredImages.length > 0}
 				<GalleryGrid images={filteredImages} />
 			{:else}
-				<div
-					class="rounded-lg border border-slate-900/10 bg-white p-12 text-center text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
-				>
+				<div class="rounded-lg border border-white/10 bg-black/30 p-12 text-center text-white/80">
 					No photographs match that filter yet.
 				</div>
 			{/if}

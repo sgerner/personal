@@ -59,7 +59,7 @@
 <div class="fixed right-0 bottom-0 left-0 z-50 pb-[env(safe-area-inset-bottom)] md:hidden">
 	{#if moreOpen}
 		<div
-			class="absolute right-2 bottom-full mb-2 min-w-52 rounded-lg border border-slate-900/15 bg-white p-2 text-slate-950 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#14121d] dark:text-white"
+			class="absolute right-2 bottom-full mb-2 min-w-52 rounded-lg border border-white/15 bg-[#14121d]/95 p-2 text-white shadow-2xl backdrop-blur-xl"
 			role="menu"
 			aria-label="More options"
 		>
@@ -68,24 +68,24 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				role="menuitem"
-				class="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-semibold transition hover:bg-slate-100 dark:hover:bg-white/10"
+				class="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-semibold transition hover:bg-white/10"
 				onclick={() => (moreOpen = false)}
 			>
-				<Croissant size={20} class="text-lime-800 dark:text-secondary-300" />
+				<Croissant size={20} class="text-secondary-300" />
 				<span class="flex-1">Visit the Bakery</span>
-				<ExternalLink size={14} class="text-slate-600 dark:text-slate-300" />
+				<ExternalLink size={14} class="text-white/50" />
 			</a>
 			<button
 				type="button"
 				role="menuitem"
-				class="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition hover:bg-slate-100 dark:hover:bg-white/10"
+				class="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition hover:bg-white/10"
 				onclick={toggleMode}
 			>
 				{#if isDarkMode}
-					<Sun size={20} class="text-lime-800 dark:text-secondary-300" />
+					<Sun size={20} class="text-secondary-300" />
 					<span>Use light theme</span>
 				{:else}
-					<Moon size={20} class="text-lime-800 dark:text-secondary-300" />
+					<Moon size={20} class="text-secondary-300" />
 					<span>Use dark theme</span>
 				{/if}
 			</button>
@@ -94,7 +94,7 @@
 
 	<Navigation
 		layout="bar"
-		class="border-t border-slate-900/10 bg-white/95 text-slate-950 backdrop-blur-xl dark:border-white/10 dark:bg-[#14121d]/95 dark:text-white"
+		class="border-t border-white/10 bg-[#14121d]/90 text-white backdrop-blur-xl"
 	>
 		<Navigation.Menu class="flex w-full flex-row">
 			{#each routes as route}
@@ -104,8 +104,8 @@
 					onclick={(event) => handleNavigation(event, route.href)}
 					class="flex flex-1 items-center justify-center py-4 transition-colors {page.url
 						.pathname === route.href
-						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950'
-						: 'hover:bg-slate-100 dark:hover:bg-slate-800'}"
+						? 'preset-filled-primary-500'
+						: 'hover:bg-surface-800'}"
 				>
 					{@const Icon = route.icon}
 					<Icon size={24} />
@@ -113,7 +113,7 @@
 			{/each}
 			<button
 				type="button"
-				class="flex flex-1 items-center justify-center py-4 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+				class="flex flex-1 items-center justify-center py-4 transition-colors hover:bg-surface-800"
 				onclick={() => (moreOpen = !moreOpen)}
 				aria-label="More options"
 				aria-expanded={moreOpen}
@@ -127,10 +127,7 @@
 
 <!-- Desktop Sidebar -->
 <div class="sticky top-0 z-50 hidden h-screen shrink-0 md:block">
-	<Navigation
-		layout="rail"
-		class="h-full bg-white/95 text-slate-950 backdrop-blur-xs dark:bg-[#14121d]/95 dark:text-white"
-	>
+	<Navigation layout="rail" class="h-full bg-surface-900/70 text-white backdrop-blur-xs">
 		<Navigation.Header>
 			<a
 				href="/"
@@ -149,8 +146,8 @@
 					onclick={(event) => handleNavigation(event, route.href)}
 					class="flex w-full flex-col items-center justify-center p-4 transition-colors {page.url
 						.pathname === route.href
-						? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950'
-						: 'hover:bg-slate-100 dark:hover:bg-slate-800'}"
+						? 'preset-filled-primary-500'
+						: 'hover:bg-surface-800'}"
 				>
 					{@const Icon = route.icon}
 					<Icon size={24} />
@@ -161,7 +158,7 @@
 				href="https://ButteredUpBakery.com"
 				target="_blank"
 				aria-label="Visit Buttered Up Bakery (opens in a new tab)"
-				class="flex w-full flex-col items-center justify-center p-4 hover:bg-slate-100 dark:hover:bg-slate-800"
+				class="flex w-full flex-col items-center justify-center p-4 hover:bg-surface-800"
 			>
 				<Croissant size={24} />
 				<span class="mt-2 text-xs">Bakery</span>

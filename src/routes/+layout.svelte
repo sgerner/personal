@@ -1,6 +1,5 @@
 <script>
 	import '../app.css';
-	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { images } from '$lib/stores/images.js';
 	import NavBar from '$lib/components/nav/NavBar.svelte';
@@ -41,9 +40,7 @@
 </svelte:head>
 
 <div class="relative isolate min-h-screen">
-	{#if page.route.id === '/'}
-		<BackgroundRotator pool={backgroundPool} intervalMs={30000} />
-	{/if}
+	<BackgroundRotator pool={backgroundPool} intervalMs={30000} />
 	<div class="site-ambient pointer-events-none fixed inset-0 z-[1]" aria-hidden="true"></div>
 
 	<div class="relative z-10 flex min-h-screen">

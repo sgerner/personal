@@ -63,7 +63,7 @@
 
 	{#if enableVignette}
 		<div
-			class="absolute inset-0 z-10 bg-black/65 [box-shadow:inset_0_0_10vmin_rgba(0,0,0,0.5)]"
+			class="absolute inset-0 z-10 bg-black/20 [box-shadow:inset_0_0_10vmin_rgba(0,0,0,0.5)]"
 		></div>
 	{/if}
 </div>
@@ -91,6 +91,6 @@
 	}
 
 	:global(html[data-mode='light']) .bg-layer {
-		filter: brightness(0.8);
+		filter: brightness(1.2);
 	}
 </style>

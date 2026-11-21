@@ -4,7 +4,7 @@
 	let {
 		title = 'Project Title',
 		description = 'A brief one-line description of the project.',
-		tags = ['Svelte', 'Tailwind', 'Vercel'],
+		tags = ['SvelteKit', 'Node.js', 'CapRover'],
 		githubUrl = null,
 		demoUrl = null,
 		image = null,

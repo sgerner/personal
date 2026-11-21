@@ -1,38 +1,16 @@
-# sv
+# Personal website
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The SvelteKit site for `stevengerner.com`.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Local development
 
 ```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm ci
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Deployment
 
-To create a production version of your app:
+The site uses `@sveltejs/adapter-node` and runs in the CapRover app `personal` on port 3000. CapRover builds the Docker image from `Dockerfile`, referenced by `captain-definition`.
 
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+GitHub Actions deploys every push to `main`. The repository needs the app-scoped `CAPROVER_APP_TOKEN` Actions secret. The app's `ADMIN_PASSWORD` and `IMAGE_SERVER_AUTH_TOKEN` values are configured in CapRover.

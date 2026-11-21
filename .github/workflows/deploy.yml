@@ -1,0 +1,20 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: caprover/deploy-from-github@v2
+        with:
+          server: https://captain.stevengerner.com
+          app: personal
+          token: ${{ secrets.CAPROVER_APP_TOKEN }}

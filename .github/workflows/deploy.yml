@@ -3,6 +3,8 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - .stitch.json
   workflow_dispatch:
 
 permissions:
@@ -13,8 +15,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: caprover/deploy-from-github@v2
-        with:
-          server: https://captain.stevengerner.com
-          app: personal
-          token: ${{ secrets.CAPROVER_APP_TOKEN }}
+      - name: Package source
+        run: git archive --format=tar --output deploy.tar "$GITHUB_SHA"
+      - name: Deploy to CapRover
+        env:
+          CAPROVER_APP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file" deploy.tar' EXIT
+
+          http_status="$(curl --silent --show-error \
+            --output "$response_file" \
+            --write-out '%{http_code}' \
+            --max-time 300 \
+            --header "User-Agent: personal-site-deploy/${GITHUB_SHA}" \
+            --header "x-captain-app-token: ${CAPROVER_APP_TOKEN}" \
+            --header 'x-namespace: captain' \
+            --form 'sourceFile=@deploy.tar;type=application/x-tar' \
+            --form-string "gitHash=${GITHUB_SHA}" \
+            'https://captain.stevengerner.com/api/v2/user/apps/appData/personal?detached=1')"
+
+          if [[ ! "$http_status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "CapRover returned HTTP ${http_status}:"
+            head -c 500 "$response_file"
+            exit 1
+          fi
+
+          if ! api_status="$(jq -r '.status // empty' "$response_file")"; then
+            echo 'CapRover returned invalid JSON:'
+            head -c 500 "$response_file"
+            exit 1
+          fi
+
+          if [[ "$api_status" != '100' && "$api_status" != '101' ]]; then
+            description="$(jq -r '.description // "No description provided"' "$response_file")"
+            echo "CapRover rejected the deployment (status ${api_status:-unknown}): ${description}"
+            exit 1
+          fi
